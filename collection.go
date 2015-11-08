@@ -32,6 +32,16 @@ type Collection struct {
 }
 
 func (c *Collection) getIdx(name string) *index {
+	idx, ok := c.idx[name]
+	if !ok {
+		log.Panicf(
+			"y/collection: The index \"%s\" not found in collection \"%s\".",
+			name, c.schema.table)
+	}
+	return idx
+}
+
+func (c *Collection) createIdx(name string) *index {
 	if idx, ok := c.idx[name]; ok {
 		return idx
 	}
@@ -45,7 +55,7 @@ func (c *Collection) add(v reflect.Value) {
 
 	for name := range c.schema.xinfo.idx {
 		key := v.Field(c.schema.fields[name].i).Int()
-		c.getIdx(name).add(key, cell)
+		c.createIdx(name).add(key, cell)
 	}
 }
 
@@ -68,18 +78,8 @@ func (c *Collection) List() []interface{} {
 func (c *Collection) Join(j *Collection) {
 	fk := j.schema.fk(c.schema)
 
-	cidx, ok := c.idx[fk.target]
-	if !ok {
-		log.Panicf(
-			"y/collection: The index \"%s\" not found in collection \"%s\".",
-			fk.target, c.schema.table)
-	}
-	jidx, ok := j.idx[fk.from]
-	if !ok {
-		log.Panicf(
-			"y/collection: The index \"%s\" not found in collection \"%s\".",
-			fk.from, j.schema.table)
-	}
+	cidx := c.getIdx(fk.target)
+	jidx := j.getIdx(fk.from)
 
 	name := j.schema.t.Name()
 

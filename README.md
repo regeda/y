@@ -17,12 +17,12 @@ go get github.com/Repo2/y
 Fetch executes ```SELECT``` statement and returns a collection of objects.
 ```go
 type Account struct {
-    ID   int64  `db:"id,pk"`
-    Name string `db:"name"`
+  ID   int64  `db:"id,pk"`
+  Name string `db:"name"`
 }
 c, err := y.New(Account{}).Fetch(db)
 if err != nil {
-    log.Panicln(err)
+  log.Panicln(err)
 }
 log.Printf("%#v\n", c.List())
 ```
@@ -31,16 +31,16 @@ log.Printf("%#v\n", c.List())
 Find modifies a query for custom selection.
 ```go
 type Order struct {
-    ID    int64 `db:"id,pk"`
-    Price int   `db:"price"`
+  ID    int64 `db:"id,pk"`
+  Price int   `db:"price"`
 }
 c, err := y.New(Order{}).
-    Find(func(b squirrel.SelectBuilder) squirrel.SelectBuilder {
-        return b.Where("price > ?", 10)
-    }).
-    Fetch(db)
+  Find(func(b squirrel.SelectBuilder) squirrel.SelectBuilder {
+    return b.Where("price > ?", 10)
+  }).
+  Fetch(db)
 if err != nil {
-    log.Panicln(err)
+  log.Panicln(err)
 }
 log.Printf("%#v\n", c.List())
 ```
@@ -49,13 +49,13 @@ log.Printf("%#v\n", c.List())
 Load executes ```SELECT``` statement for one row and loads the object in self.
 ```go
 type Todo struct {
-    ID    int64  `db:"id,pk"`
-    Title string `db:"title"`
+  ID    int64  `db:"id,pk"`
+  Title string `db:"title"`
 }
 todo := Todo{ID: 1}
 err := y.New(&todo).Load(db)
 if err != nil {
-    log.Panicln(err)
+  log.Panicln(err)
 }
 log.Printf("%#v\n", todo)
 ```
@@ -64,36 +64,54 @@ log.Printf("%#v\n", todo)
 Put executes ```INSERT``` statement and assigns auto-increment value.
 ```go
 type User struct {
-    ID   int64  `db:"id,pk,autoincr"`
-    Name string `db:"name"`
+  ID   int64  `db:"id,pk,autoincr"`
+  Name string `db:"name"`
 }
 user := User{Name: "Harry"}
 err := y.New(&user).Put(db)
 if err != nil {
-    log.Panicln(err)
+  log.Panicln(err)
 }
 log.Printf("%#v\n", user)
 ```
+
+### Update
+Update executes ```UPDATE``` statement. The action compares origin and modified objects by their version in the database.
+```go
+type Car struct {
+  ID      int64 `db:"id,pk"`
+  Power   int   `db:"power"`
+  Version int   `db:"_version"`
+}
+car := Car{ID: 1}
+updated, err := y.Update(db, y.New(&car), y.Values{"power": 50})
+if err != nil {
+  log.Panicln(err)
+}
+if updated {
+  log.Printf("%#v\n", car)
+}
+```  
 
 ### Join
 Join builds relations by foreign keys
 ```go
 type User struct {
-    ID          int64 `db:"id,pk"`
-    DeviceArray []*Device
+  ID          int64 `db:"id,pk"`
+  DeviceArray []*Device
 }
 type Device struct {
-    ID     int64  `db:"id,pk"`
-    UserID int64  `db:"user_id,fk"`
-    Name   string `db:"name"`
+  ID     int64  `db:"id,pk"`
+  UserID int64  `db:"user_id,fk"`
+  Name   string `db:"name"`
 }
 users, err := y.New(User{}).Fetch(db)
 if err != nil {
-    log.Panicln(err)
+  log.Panicln(err)
 }
 if !users.Empty() {
-    devices, err := y.New(Device{}).Join(db, users)
-    log.Printf("All users with their devices: %#v\n", users)
-    log.Printf("All devices: %#v\n", devices)
+  devices, err := y.New(Device{}).Join(db, users)
+  log.Printf("All users with their devices: %#v\n", users)
+  log.Printf("All devices: %#v\n", devices)
 }
 ```

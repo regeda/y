@@ -37,12 +37,7 @@ func (p *Proxy) Collection() *Collection {
 func (p *Proxy) Join(db DB, in *Collection) (*Collection, error) {
 	fk := p.schema.fk(in.schema)
 
-	idx, ok := in.idx[fk.target]
-	if !ok {
-		log.Panicf(
-			"y/proxy: The index \"%s\" not found in collection \"%s\".",
-			fk.target, in.schema.table)
-	}
+	idx := in.getIdx(fk.target)
 
 	c, err := p.Find(ByEq(sq.Eq{fk.from: idx.keys})).Fetch(db)
 	if err != nil {
