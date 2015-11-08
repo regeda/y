@@ -12,7 +12,7 @@ func factory(v reflect.Value) reflect.Value {
 	case reflect.Struct:
 		return v
 	}
-	panic("y/y: Y supports ptr on struct or struct only.")
+	panic("y/main: Y supports ptr on struct or struct only.")
 }
 
 // New creates a proxy of an interface
