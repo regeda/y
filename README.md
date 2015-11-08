@@ -79,8 +79,8 @@ log.Printf("%#v\n", user)
 Join builds relations by foreign keys
 ```go
 type User struct {
-    ID      int64 `db:"id,pk"`
-    Devices []*Device
+    ID          int64 `db:"id,pk"`
+    DeviceArray []*Device
 }
 type Device struct {
     ID     int64  `db:"id,pk"`

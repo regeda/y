@@ -88,7 +88,7 @@ func (c *Collection) Join(j *Collection) {
 			for _, ccell := range ccells {
 				citem := reflect.ValueOf(c.items[ccell]).Elem()
 				// one-to-many
-				target := citem.FieldByName(name + "s")
+				target := citem.FieldByName(name + "Array")
 				if target.CanSet() {
 					reflected := make([]reflect.Value, len(jcells))
 					for i, jcell := range jcells {
