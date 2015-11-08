@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Repo2/y.svg?branch=master)](https://travis-ci.org/Repo2/y)
 
-Be faster with Y. The simplest ORM framework for Golang.
+Be faster with Y. The simplest ORM-like framework for Golang.
 
 ## Install
 
@@ -14,7 +14,7 @@ go get github.com/Repo2/y
 ## Actions
 
 ### Fetch
-Fetch executes ```SELECT``` statement and returns a collection of objects.
+**Fetch** executes ```SELECT``` statement and returns a collection of objects.
 ```go
 type Account struct {
   ID   int64  `db:"id,pk"`
@@ -28,7 +28,7 @@ log.Printf("%#v\n", c.List())
 ```
 
 ### Find
-Find modifies a query for custom selection.
+**Find** modifies a query for custom selection.
 ```go
 type Order struct {
   ID    int64 `db:"id,pk"`
@@ -46,7 +46,7 @@ log.Printf("%#v\n", c.List())
 ```
 
 ### Load
-Load executes ```SELECT``` statement for one row and loads the object in self.
+**Load** executes ```SELECT``` statement for one row and loads the object in self.
 ```go
 type Todo struct {
   ID    int64  `db:"id,pk"`
@@ -61,7 +61,7 @@ log.Printf("%#v\n", todo)
 ```
 
 ### Put
-Put executes ```INSERT``` statement and assigns auto-increment value.
+**Put** executes ```INSERT``` statement and assigns auto-increment value.
 ```go
 type User struct {
   ID   int64  `db:"id,pk,autoincr"`
@@ -76,7 +76,7 @@ log.Printf("%#v\n", user)
 ```
 
 ### Update
-Update executes ```UPDATE``` statement. The action compares origin and modified objects by their version in the database.
+**Update** executes ```UPDATE``` statement. The action compares origin and modified objects by their version in the database.
 ```go
 type Car struct {
   ID      int64 `db:"id,pk"`
@@ -94,7 +94,7 @@ if updated {
 ```  
 
 ### Join
-Join builds relations by foreign keys
+**Join** builds relations by foreign keys
 ```go
 type User struct {
   ID          int64 `db:"id,pk"`
@@ -115,3 +115,7 @@ if !users.Empty() {
   log.Printf("All devices: %#v\n", devices)
 }
 ```
+
+## TODO
+- [ ] More tests!
+- [ ] Add **Delete** action
