@@ -9,7 +9,7 @@ import (
 type Values map[string]interface{}
 
 var (
-	snake = regexp.MustCompile("([A-Z]*)([A-Z][^A-Z]+|$)")
+	snake = regexp.MustCompile("(^[^A-Z]*|[A-Z]*)([A-Z][^A-Z]+|$)")
 )
 
 func underscore(s string) string {

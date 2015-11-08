@@ -12,6 +12,8 @@ func TestUnderscore(t *testing.T) {
 	assert.Equal("camel_case", underscore("CamelCase"))
 	assert.Equal("camel", underscore("Camel"))
 	assert.Equal("camel", underscore("CAMEL"))
+	assert.Equal("camel", underscore("camel"))
 	assert.Equal("big_case", underscore("BIGCase"))
-	assert.Equal("small_case", underscore("SmallCASE"))
+	assert.Equal("private_case", underscore("privateCase"))
+	assert.Equal("public_case", underscore("PublicCASE"))
 }
