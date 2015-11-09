@@ -84,7 +84,7 @@ type Car struct {
   Version int   `db:"_version"`
 }
 car := Car{ID: 1}
-updated, err := y.Update(db, y.New(&car), y.Values{"power": 50})
+updated, err := y.New(&car).Update(db, y.Values{"power": 50})
 if err != nil {
   log.Panicln(err)
 }

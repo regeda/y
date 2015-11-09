@@ -69,6 +69,11 @@ func (c *Collection) First() interface{} {
 	return c.items[0]
 }
 
+// Size returns count of items
+func (c *Collection) Size() int {
+	return len(c.items)
+}
+
 // List returns all items
 func (c *Collection) List() []interface{} {
 	return c.items

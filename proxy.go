@@ -55,6 +55,11 @@ func (p *Proxy) Load(db DB) error {
 	for _, pk := range p.schema.xinfo.pk {
 		pks[pk] = p.Field(pk).Interface()
 	}
+	if len(pks) == 0 {
+		log.Panicf(
+			"y/proxy: No primary key found in the \"%s\".",
+			p.schema.table)
+	}
 	return p.Find(ByEq(pks)).Load(db)
 }
 

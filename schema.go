@@ -56,7 +56,7 @@ type fkopt struct {
 	from   string
 }
 
-func (f fkopt) reverse() *fkopt {
+func (f fkopt) flip() *fkopt {
 	return &fkopt{f.from, f.target}
 }
 
@@ -163,7 +163,7 @@ func (s *schema) fk(in *schema) *fkopt {
 			"y/schema: The foreign key between \"%s\" and \"%s\" not found",
 			s.table, in.table)
 	}
-	return fk.reverse()
+	return fk.flip()
 }
 
 type cache struct {
