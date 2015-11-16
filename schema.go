@@ -109,11 +109,11 @@ func (s *schema) parseopts(xopts []string) *fieldopts {
 	return opts
 }
 
-func (s *schema) parsename() {
+func (s *schema) parseName() {
 	s.table = underscore(s.t.Name())
 }
 
-func (s *schema) parsefields() {
+func (s *schema) parseFields() {
 	for i, l := 0, s.t.NumField(); i < l; i++ {
 		f := s.t.Field(i)
 		col := f.Tag.Get("db")
@@ -146,8 +146,8 @@ func (s *schema) create() reflect.Value {
 }
 
 func (s *schema) parse() {
-	s.parsename()
-	s.parsefields()
+	s.parseName()
+	s.parseFields()
 }
 
 func (s *schema) fk(in *schema) *fkopt {
@@ -175,7 +175,7 @@ var loaded = cache{
 	types: make(map[reflect.Type]*schema),
 }
 
-func parsetype(t reflect.Type) *schema {
+func newSchema(t reflect.Type) *schema {
 	s := &schema{
 		t:      t,
 		fields: make(map[string]*field),
@@ -186,7 +186,7 @@ func parsetype(t reflect.Type) *schema {
 	return s
 }
 
-func parsevalue(v reflect.Value) *schema {
+func loadSchema(v reflect.Value) *schema {
 	t := v.Type()
 
 	loaded.RLock()
@@ -198,7 +198,7 @@ func parsevalue(v reflect.Value) *schema {
 
 	loaded.Lock()
 	defer loaded.Unlock()
-	s = parsetype(t)
+	s = newSchema(t)
 	loaded.types[t] = s
 	return s
 }

@@ -101,6 +101,6 @@ func (p *Proxy) Truncate(db DB) error {
 func makeProxy(v reflect.Value) *Proxy {
 	return &Proxy{
 		v:      v,
-		schema: parsevalue(v),
+		schema: loadSchema(v),
 	}
 }

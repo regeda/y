@@ -61,7 +61,7 @@ func (c *Collection) add(v reflect.Value) {
 
 // Empty returns false if no items exist
 func (c *Collection) Empty() bool {
-	return len(c.items) == 0
+	return c.Size() == 0
 }
 
 // First returns the first item
