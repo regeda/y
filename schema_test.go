@@ -6,28 +6,50 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSchemaParseEmpty(t *testing.T) {
+func TestSchemaParseAuto(t *testing.T) {
 	type something struct {
 		X int64
+	}
+	p := New(something{})
+	assert := assert.New(t)
+	assert.Len(p.schema.fields, 1)
+	assert.NotNil(p.schema.fields["x"])
+}
+
+func TestSchemaParseAutoWithOpts(t *testing.T) {
+	type something struct {
+		X int64 `db:",pk"`
+	}
+	p := New(something{})
+	assert := assert.New(t)
+	assert.Len(p.schema.fields, 1)
+	assert.NotNil(p.schema.fields["x"])
+	assert.Equal([]string{"x"}, p.schema.xinfo.pk)
+}
+
+func TestSchemaParseEmpty(t *testing.T) {
+	type something struct {
+		X int64 `db:"-"`
 	}
 	p := New(something{})
 	assert.Empty(t, p.schema.fields)
 }
 
-func TestSchemaParseFields(t *testing.T) {
-	type something struct {
-		Foo  int64 `db:"foo"`
-		Bar  int64 `db:"-"`
-		Baz  int64 `db:"baz"`
-		Quux int64
+func TestCompositeSchema(t *testing.T) {
+	type foo struct {
+		x int64 `db:"x"`
+		y int64 `db:"y"`
 	}
-	p := New(something{})
+	type bar struct {
+		foo
+		z int64 `db:"z"`
+	}
+	p := New(bar{})
 	assert := assert.New(t)
-	assert.Len(p.schema.fields, 2)
-	assert.NotNil(p.schema.fields["foo"])
-	assert.Nil(p.schema.fields["bar"])
-	assert.NotNil(p.schema.fields["baz"])
-	assert.Nil(p.schema.fields["quux"])
+	assert.Len(p.schema.fields, 3)
+	assert.NotNil(p.schema.fields["x"])
+	assert.NotNil(p.schema.fields["y"])
+	assert.NotNil(p.schema.fields["z"])
 }
 
 func TestSchemaParseSinglePK(t *testing.T) {

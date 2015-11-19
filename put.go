@@ -7,7 +7,7 @@ func Put(db DB, p *Proxy) error {
 	set := sq.Eq{}
 	for name, f := range p.schema.fields {
 		if !f.opts.autoincr {
-			set[name] = p.v.Field(f.i).Interface()
+			set[name] = p.v.FieldByName(f.Name).Interface()
 		}
 	}
 	result, err := exec(sq.Insert(p.schema.table).SetMap(set), db)
@@ -18,7 +18,7 @@ func Put(db DB, p *Proxy) error {
 		f := p.schema.fields[pk]
 		if f.opts.autoincr {
 			id, _ := result.LastInsertId()
-			p.v.Field(f.i).SetInt(id)
+			p.v.FieldByName(f.Name).SetInt(id)
 			break
 		}
 	}

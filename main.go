@@ -5,7 +5,7 @@ import "reflect"
 // Debug enables additional info
 var Debug = true
 
-func factory(v reflect.Value) reflect.Value {
+func valueOf(v reflect.Value) reflect.Value {
 	switch v.Kind() {
 	case reflect.Ptr:
 		return v.Elem()
@@ -18,6 +18,6 @@ func factory(v reflect.Value) reflect.Value {
 // New creates a proxy of an interface
 func New(v interface{}) *Proxy {
 	return makeProxy(
-		factory(reflect.ValueOf(v)),
+		valueOf(reflect.ValueOf(v)),
 	)
 }

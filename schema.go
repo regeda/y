@@ -14,9 +14,8 @@ type fieldopts struct {
 }
 
 type field struct {
-	t    reflect.Type
+	reflect.StructField
 	opts *fieldopts
-	i    int
 }
 
 type xinfo struct {
@@ -109,23 +108,32 @@ func (s *schema) parseopts(xopts []string) *fieldopts {
 	return opts
 }
 
-func (s *schema) parseName() {
-	s.table = underscore(s.t.Name())
+func (s *schema) parseName(t reflect.Type) {
+	s.table = underscore(t.Name())
 }
 
-func (s *schema) parseFields() {
-	for i, l := 0, s.t.NumField(); i < l; i++ {
-		f := s.t.Field(i)
+func (s *schema) parseFields(t reflect.Type) {
+	for i, l := 0, t.NumField(); i < l; i++ {
+		f := t.Field(i)
 		col := f.Tag.Get("db")
-		if col == "-" || col == "" {
+		if col == "-" {
+			continue
+		}
+		if f.Anonymous {
+			if f.Type.Kind() != reflect.Struct {
+				panic("y/schema: Y supports embedded struct only.")
+			}
+			s.parseFields(f.Type)
 			continue
 		}
 		xopts := strings.Split(col, ",")
+		if xopts[0] == "" {
+			xopts[0] = underscore(f.Name)
+		}
 		s.fseq = append(s.fseq, xopts[0])
 		s.fields[xopts[0]] = &field{
-			i:    i,
-			t:    f.Type,
-			opts: s.parseopts(xopts),
+			f,
+			s.parseopts(xopts),
 		}
 	}
 }
@@ -136,7 +144,7 @@ func (s *schema) ptrs() []interface{} {
 
 func (s *schema) set(ptrs []interface{}, v reflect.Value) {
 	for i, col := range s.fseq {
-		x := v.Field(s.fields[col].i).Addr()
+		x := v.FieldByName(s.fields[col].Name).Addr()
 		ptrs[i] = x.Interface()
 	}
 }
@@ -146,8 +154,8 @@ func (s *schema) create() reflect.Value {
 }
 
 func (s *schema) parse() {
-	s.parseName()
-	s.parseFields()
+	s.parseName(s.t)
+	s.parseFields(s.t)
 }
 
 func (s *schema) fk(in *schema) *fkopt {

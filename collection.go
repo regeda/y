@@ -54,7 +54,7 @@ func (c *Collection) add(v reflect.Value) {
 	c.items = append(c.items, v.Addr().Interface())
 
 	for name := range c.schema.xinfo.idx {
-		key := v.Field(c.schema.fields[name].i).Int()
+		key := v.FieldByName(c.schema.fields[name].Name).Int()
 		c.createIdx(name).add(key, cell)
 	}
 }

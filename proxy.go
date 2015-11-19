@@ -76,14 +76,14 @@ func (p *Proxy) Field(name string) reflect.Value {
 			"y/proxy: The field \"%s\" not found in table \"%s\".",
 			name, p.schema.table)
 	}
-	return p.v.Field(f.i)
+	return p.v.FieldByName(f.Name)
 }
 
 // Map returns a simple map of struct values
 func (p *Proxy) Map() Values {
 	values := make(Values, len(p.schema.fseq))
 	for name, f := range p.schema.fields {
-		values[name] = p.v.Field(f.i).Interface()
+		values[name] = p.v.FieldByName(f.Name).Interface()
 	}
 	return values
 }
