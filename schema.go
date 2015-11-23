@@ -142,9 +142,9 @@ func (s *schema) ptrs() []interface{} {
 	return make([]interface{}, len(s.fseq))
 }
 
-func (s *schema) set(ptrs []interface{}, v reflect.Value) {
+func (s *schema) set(ptrs []interface{}, v value) {
 	for i, col := range s.fseq {
-		x := v.FieldByName(s.fields[col].Name).Addr()
+		x := v.field(s.fields[col].Name).Addr()
 		ptrs[i] = x.Interface()
 	}
 }
@@ -194,8 +194,10 @@ func newSchema(t reflect.Type) *schema {
 	return s
 }
 
-func loadSchema(v reflect.Value) *schema {
-	t := v.Type()
+func loadSchema(t reflect.Type) *schema {
+	if t.Kind() != reflect.Struct {
+		log.Panicln("y/schema: Y supports Struct type only.")
+	}
 
 	loaded.RLock()
 	s, found := loaded.types[t]

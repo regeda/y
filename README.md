@@ -69,11 +69,25 @@ type User struct {
   Name string `db:"name"`
 }
 user := User{Name: "Harry"}
-err := y.New(&user).Put(db)
+_, err := y.New(&user).Put(db)
 if err != nil {
   log.Panicln(err)
 }
 log.Printf("%#v\n", user)
+```
+You can use ```PUT``` for batch statement also.
+```go
+type Log struct {
+  Msg string
+}
+logs := []Log{
+  {"It"}, {"Works"},
+}
+affected, err := y.New(logs).Put(db)
+if err != nil {
+  log.Panicln(err)
+}
+log.Printf("%#v\n", affected)
 ```
 
 ### Update

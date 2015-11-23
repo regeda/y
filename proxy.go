@@ -9,12 +9,12 @@ import (
 
 // Proxy contains a schema of a type
 type Proxy struct {
-	v      reflect.Value
+	v      value
 	schema *schema
 }
 
 // Put creates a new object
-func (p *Proxy) Put(db DB) error {
+func (p *Proxy) Put(db DB) (int64, error) {
 	return Put(db, p)
 }
 
@@ -76,14 +76,14 @@ func (p *Proxy) Field(name string) reflect.Value {
 			"y/proxy: The field \"%s\" not found in table \"%s\".",
 			name, p.schema.table)
 	}
-	return p.v.FieldByName(f.Name)
+	return p.v.field(f.Name)
 }
 
 // Map returns a simple map of struct values
 func (p *Proxy) Map() Values {
 	values := make(Values, len(p.schema.fseq))
 	for name, f := range p.schema.fields {
-		values[name] = p.v.FieldByName(f.Name).Interface()
+		values[name] = p.v.field(f.Name).Interface()
 	}
 	return values
 }
@@ -98,9 +98,14 @@ func (p *Proxy) Truncate(db DB) error {
 	return Truncate(db, p)
 }
 
-func makeProxy(v reflect.Value) *Proxy {
-	return &Proxy{
-		v:      v,
-		schema: loadSchema(v),
+func proxyOf(v reflect.Value) *Proxy {
+	switch v.Kind() {
+	case reflect.Array, reflect.Slice:
+		return &Proxy{plural{v}, loadSchema(v.Type().Elem())}
+	case reflect.Ptr:
+		v = v.Elem()
+		fallthrough
+	default:
+		return &Proxy{singular{v}, loadSchema(v.Type())}
 	}
 }

@@ -52,6 +52,16 @@ func TestCompositeSchema(t *testing.T) {
 	assert.NotNil(p.schema.fields["z"])
 }
 
+func TestSchemaParseArray(t *testing.T) {
+	type something struct {
+		x int64
+	}
+	p := New([]something{})
+	assert := assert.New(t)
+	assert.Len(p.schema.fields, 1)
+	assert.NotNil(p.schema.fields["x"])
+}
+
 func TestSchemaParseSinglePK(t *testing.T) {
 	type something struct {
 		X int64 `db:"x,pk"`

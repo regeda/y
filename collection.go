@@ -26,7 +26,7 @@ func makeIndex() *index {
 
 // Collection contains items and indexes
 type Collection struct {
-	items  []interface{}
+	items  []reflect.Value
 	idx    map[string]*index
 	schema *schema
 }
@@ -51,12 +51,20 @@ func (c *Collection) createIdx(name string) *index {
 
 func (c *Collection) add(v reflect.Value) {
 	cell := len(c.items)
-	c.items = append(c.items, v.Addr().Interface())
+	c.items = append(c.items, v.Addr())
 
 	for name := range c.schema.xinfo.idx {
 		key := v.FieldByName(c.schema.fields[name].Name).Int()
 		c.createIdx(name).add(key, cell)
 	}
+}
+
+func (c *Collection) cells(cells []int) []reflect.Value {
+	items := make([]reflect.Value, len(cells))
+	for i, cell := range cells {
+		items[i] = c.items[cell]
+	}
+	return items
 }
 
 // Empty returns false if no items exist
@@ -66,7 +74,7 @@ func (c *Collection) Empty() bool {
 
 // First returns the first item
 func (c *Collection) First() interface{} {
-	return c.items[0]
+	return c.items[0].Interface()
 }
 
 // Size returns count of items
@@ -76,7 +84,11 @@ func (c *Collection) Size() int {
 
 // List returns all items
 func (c *Collection) List() []interface{} {
-	return c.items
+	items := make([]interface{}, c.Size())
+	for i, item := range c.items {
+		items[i] = item.Interface()
+	}
+	return items
 }
 
 // Join links related collection
@@ -91,21 +103,18 @@ func (c *Collection) Join(j *Collection) {
 	for jkey, jcells := range jidx.cells {
 		if ccells, ok := cidx.cells[jkey]; ok {
 			for _, ccell := range ccells {
-				citem := reflect.ValueOf(c.items[ccell]).Elem()
+				citem := c.items[ccell].Elem()
 				// one-to-many
 				target := citem.FieldByName(name + "Array")
 				if target.CanSet() {
-					reflected := make([]reflect.Value, len(jcells))
-					for i, jcell := range jcells {
-						reflected[i] = reflect.ValueOf(j.items[jcell])
-					}
-					target.Set(reflect.Append(target, reflected...))
+					items := j.cells(jcells)
+					target.Set(reflect.Append(target, items...))
 					continue
 				}
 				// one-to-one
 				target = citem.FieldByName(name)
 				if target.CanSet() && len(jcells) == 1 {
-					target.Set(reflect.ValueOf(j.items[jcells[0]]))
+					target.Set(j.items[jcells[0]])
 				}
 			}
 		}
