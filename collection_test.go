@@ -1,53 +1,68 @@
 package y
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestEmptyCollection(t *testing.T) {
-	type something struct {
-	}
-	p := New(something{})
-	c := p.Collection()
-	assert.True(t, c.Empty())
-}
-
-func TestAddOneItemToCollection(t *testing.T) {
+var _ = Describe("Collection", func() {
 	type something struct {
 		ID int64 `db:"id"`
 	}
-	p := New(something{})
-	c := p.Collection()
 
-	v1 := p.schema.create().Elem()
-	ptr1 := v1.Addr().Interface().(*something)
-	ptr1.ID = 1
-	c.add(v1)
+	var (
+		c *Collection
+		p *Proxy
+	)
 
-	assert := assert.New(t)
-	assert.False(c.Empty())
-	assert.Equal(ptr1, c.First())
-}
+	BeforeEach(func() {
+		p = New(something{})
+		c = p.Collection()
+	})
 
-func TestAddTwoItemsToCollection(t *testing.T) {
-	type something struct {
-		ID int64 `db:"id"`
-	}
-	p := New(something{})
-	c := p.Collection()
+	It("should be empty", func() {
+		Expect(c.Empty()).To(BeTrue())
+	})
 
-	ptrs := []interface{}{}
-	for _, id := range []int64{1, 2} {
-		v := p.schema.create().Elem()
-		c.add(v)
-		ptr := v.Addr().Interface().(*something)
-		ptrs = append(ptrs, ptr)
-		ptr.ID = id
-	}
+	Context("when one item added", func() {
+		var ptr *something
 
-	assert := assert.New(t)
-	assert.Equal(2, c.Size())
-	assert.Equal(ptrs, c.List())
-}
+		BeforeEach(func() {
+			v := p.schema.create().Elem()
+			ptr = v.Addr().Interface().(*something)
+			ptr.ID = 1
+			c.add(v)
+		})
+
+		It("should be non-empty", func() {
+			Expect(c.Empty()).To(BeFalse())
+		})
+
+		It("should be contain the first item", func() {
+			Expect(c.First()).To(Equal(ptr))
+		})
+	})
+
+	Context("when two items added", func() {
+		var ptrs []interface{}
+
+		BeforeEach(func() {
+			ptrs = []interface{}{}
+			for _, id := range []int64{1, 2} {
+				v := p.schema.create().Elem()
+				c.add(v)
+				ptr := v.Addr().Interface().(*something)
+				ptrs = append(ptrs, ptr)
+				ptr.ID = id
+			}
+		})
+
+		It("should contain two items", func() {
+			Expect(c.Size()).To(Equal(2))
+		})
+
+		It("should list correct sequence of items", func() {
+			Expect(c.List()).To(Equal(ptrs))
+		})
+	})
+})

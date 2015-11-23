@@ -1,113 +1,172 @@
 package y
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestSchemaParseAuto(t *testing.T) {
-	type something struct {
-		X int64
-	}
-	p := New(something{})
-	assert := assert.New(t)
-	assert.Len(p.schema.fields, 1)
-	assert.NotNil(p.schema.fields["x"])
-}
+var _ = Describe("Schema", func() {
+	var p *Proxy
 
-func TestSchemaParseAutoWithOpts(t *testing.T) {
-	type something struct {
-		X int64 `db:",pk"`
-	}
-	p := New(something{})
-	assert := assert.New(t)
-	assert.Len(p.schema.fields, 1)
-	assert.NotNil(p.schema.fields["x"])
-	assert.Equal([]string{"x"}, p.schema.xinfo.pk)
-}
+	Context("when a struct has one field without tags", func() {
+		type something struct {
+			ID int64
+		}
 
-func TestSchemaParseEmpty(t *testing.T) {
-	type something struct {
-		X int64 `db:"-"`
-	}
-	p := New(something{})
-	assert.Empty(t, p.schema.fields)
-}
+		BeforeEach(func() {
+			p = New(something{})
+		})
 
-func TestCompositeSchema(t *testing.T) {
-	type foo struct {
-		x int64 `db:"x"`
-		y int64 `db:"y"`
-	}
-	type bar struct {
-		foo
-		z int64 `db:"z"`
-	}
-	p := New(bar{})
-	assert := assert.New(t)
-	assert.Len(p.schema.fields, 3)
-	assert.NotNil(p.schema.fields["x"])
-	assert.NotNil(p.schema.fields["y"])
-	assert.NotNil(p.schema.fields["z"])
-}
+		It("should contain one parsed field", func() {
+			Expect(p.schema.fields).To(HaveLen(1))
+		})
 
-func TestSchemaParseArray(t *testing.T) {
-	type something struct {
-		x int64
-	}
-	p := New([]something{})
-	assert := assert.New(t)
-	assert.Len(p.schema.fields, 1)
-	assert.NotNil(p.schema.fields["x"])
-}
+		It("should contain not nil field schema", func() {
+			Expect(p.schema.fields["id"]).NotTo(BeNil())
+		})
+	})
 
-func TestSchemaParseSinglePK(t *testing.T) {
-	type something struct {
-		X int64 `db:"x,pk"`
-	}
-	p := New(something{})
-	assert := assert.New(t)
-	assert.Equal([]string{"x"}, p.schema.xinfo.pk)
-	assert.Equal(1, p.schema.xinfo.idx["x"])
-}
+	Context("when a struct has disabled field", func() {
+		type something struct {
+			ID int64 `db:"-"`
+		}
 
-func TestSchemaParseCompositePK(t *testing.T) {
-	type something struct {
-		X int64 `db:"x,pk"`
-		Y int64 `db:"y,pk"`
-	}
-	p := New(something{})
-	assert := assert.New(t)
-	assert.Equal([]string{"x", "y"}, p.schema.xinfo.pk)
-	assert.Equal(1, p.schema.xinfo.idx["x"])
-	assert.Equal(0, p.schema.xinfo.idx["y"])
-}
+		BeforeEach(func() {
+			p = New(something{})
+		})
 
-func TestSchemaParseAutoincr(t *testing.T) {
-	type something struct {
-		X int64 `db:"x,autoincr"`
-	}
-	p := New(something{})
-	assert.True(t, p.schema.fields["x"].opts.autoincr)
-}
+		It("should be empty", func() {
+			Expect(p.schema.fields).To(BeEmpty())
+		})
+	})
 
-func TestSchemaParseImplicitFK(t *testing.T) {
-	type something struct {
-		XID int64 `db:"x_id,fk"`
-	}
-	p := New(something{})
-	assert := assert.New(t)
-	assert.Equal("x_id", p.schema.fks["x"].from)
-	assert.Equal("id", p.schema.fks["x"].target)
-}
+	Context("when a struct has a primary key without name", func() {
+		type something struct {
+			ID int64 `db:",pk"`
+		}
 
-func TestSchemaParseExplicitFK(t *testing.T) {
-	type something struct {
-		XID int64 `db:"xid,fk:xoo.id"`
-	}
-	p := New(something{})
-	assert := assert.New(t)
-	assert.Equal("xid", p.schema.fks["xoo"].from)
-	assert.Equal("id", p.schema.fks["xoo"].target)
-}
+		BeforeEach(func() {
+			p = New(something{})
+		})
+
+		It("should contain a primary key with name", func() {
+			Expect(p.schema.xinfo.pk).To(Equal([]string{"id"}))
+		})
+	})
+
+	Context("when a struct has a composite primary key", func() {
+		type something struct {
+			X int64 `db:"x,pk"`
+			Y int64 `db:"y,pk"`
+		}
+
+		BeforeEach(func() {
+			p = New(something{})
+		})
+
+		It("should contain correct PK sequence", func() {
+			Expect(p.schema.xinfo.pk).To(Equal([]string{"x", "y"}))
+		})
+
+		It("should contain the first key in the index", func() {
+			Expect(p.schema.xinfo.idx["x"]).To(Equal(1))
+		})
+
+		It("shouldn't contain the second key in the index", func() {
+			Expect(p.schema.xinfo.idx["y"]).To(Equal(0))
+		})
+	})
+
+	Context("when a struct has an auto-incremented key", func() {
+		type something struct {
+			ID int64 `db:",autoincr"`
+		}
+
+		BeforeEach(func() {
+			p = New(something{})
+		})
+
+		It("should contains enabled autoincr in field opts", func() {
+			Expect(p.schema.fields["id"].opts.autoincr).To(BeTrue())
+		})
+	})
+
+	Context("when a slice of struct parsed", func() {
+		type something struct {
+			ID int64
+		}
+
+		BeforeEach(func() {
+			p = New([]something{})
+		})
+
+		It("should contain one parsed field", func() {
+			Expect(p.schema.fields).To(HaveLen(1))
+		})
+
+		It("should contain not nil field schema", func() {
+			Expect(p.schema.fields["id"]).NotTo(BeNil())
+		})
+	})
+
+	Context("when a struct contain embedded struct", func() {
+		type foo struct {
+			x int64
+			y int64
+		}
+		type bar struct {
+			foo
+			z int64
+		}
+
+		BeforeEach(func() {
+			p = New(bar{})
+		})
+
+		It("should contain three parsed field", func() {
+			Expect(p.schema.fields).To(HaveLen(3))
+		})
+
+		It("should contain parsed fields opts", func() {
+			Expect(p.schema.fields["x"]).NotTo(BeNil())
+			Expect(p.schema.fields["y"]).NotTo(BeNil())
+			Expect(p.schema.fields["z"]).NotTo(BeNil())
+		})
+	})
+
+	Context("when a struct has a foreign key", func() {
+		type something struct {
+			AnyID int64 `db:",fk"`
+		}
+
+		BeforeEach(func() {
+			p = New(something{})
+		})
+
+		It("should contain 'any_id' as own key", func() {
+			Expect(p.schema.fks["any"].from).To(Equal("any_id"))
+		})
+
+		It("should contain 'id' as a target key", func() {
+			Expect(p.schema.fks["any"].target).To(Equal("id"))
+		})
+	})
+
+	Context("when a struct has overrided foreign key", func() {
+		type something struct {
+			AnyID int64 `db:"aid,fk:any.id"`
+		}
+
+		BeforeEach(func() {
+			p = New(something{})
+		})
+
+		It("should contain 'aid' as own key", func() {
+			Expect(p.schema.fks["any"].from).To(Equal("aid"))
+		})
+
+		It("should contain 'id' as a target key", func() {
+			Expect(p.schema.fks["any"].target).To(Equal("id"))
+		})
+	})
+})

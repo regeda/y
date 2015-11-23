@@ -1,19 +1,19 @@
 package y
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestUnderscore(t *testing.T) {
-	assert := assert.New(t)
-	assert.Equal("i_love_go_and_json_so_much", underscore("ILoveGoAndJSONSoMuch"))
-	assert.Equal("camel_case", underscore("CamelCase"))
-	assert.Equal("camel", underscore("Camel"))
-	assert.Equal("camel", underscore("CAMEL"))
-	assert.Equal("camel", underscore("camel"))
-	assert.Equal("big_case", underscore("BIGCase"))
-	assert.Equal("private_case", underscore("privateCase"))
-	assert.Equal("public_case", underscore("PublicCASE"))
-}
+var _ = Describe("Utils", func() {
+	It("should be snake", func() {
+		Expect(underscore("ILoveGoAndJSONSoMuch")).To(Equal("i_love_go_and_json_so_much"))
+		Expect(underscore("CamelCase")).To(Equal("camel_case"))
+		Expect(underscore("Camel")).To(Equal("camel"))
+		Expect(underscore("CAMEL")).To(Equal("camel"))
+		Expect(underscore("camel")).To(Equal("camel"))
+		Expect(underscore("BIGCase")).To(Equal("big_case"))
+		Expect(underscore("privateCase")).To(Equal("private_case"))
+		Expect(underscore("PublicCASE")).To(Equal("public_case"))
+	})
+})
