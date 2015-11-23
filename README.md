@@ -75,7 +75,7 @@ if err != nil {
 }
 log.Printf("%#v\n", user)
 ```
-You can use ```PUT``` for batch statement also.
+You can use **Put** for batch statement also.
 ```go
 type Log struct {
   Msg string
