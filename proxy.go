@@ -1,7 +1,6 @@
 package y
 
 import (
-	"log"
 	"reflect"
 
 	sq "github.com/lann/squirrel"
@@ -51,16 +50,7 @@ func (p *Proxy) Join(db DB, in *Collection) (*Collection, error) {
 
 // Load fetches an object from db by primary key
 func (p *Proxy) Load(db DB) error {
-	pks := sq.Eq{}
-	for _, pk := range p.schema.xinfo.pk {
-		pks[pk] = p.Field(pk).Interface()
-	}
-	if len(pks) == 0 {
-		log.Panicf(
-			"y/proxy: No primary key found in the \"%s\".",
-			p.schema.table)
-	}
-	return p.Find(ByEq(pks)).Load(db)
+	return p.loadBy(db, p.primary())
 }
 
 // Version returns a revision of object
@@ -70,32 +60,30 @@ func (p *Proxy) Version() int64 {
 
 // Field returns reflected field by name
 func (p *Proxy) Field(name string) reflect.Value {
-	f, found := p.schema.fields[name]
-	if !found {
-		log.Panicf(
-			"y/proxy: The field \"%s\" not found in table \"%s\".",
-			name, p.schema.table)
-	}
-	return p.v.field(f.Name)
+	return p.schema.field(p.v, name)
 }
 
 // Map returns a simple map of struct values
 func (p *Proxy) Map() Values {
-	values := make(Values, len(p.schema.fseq))
-	for name, f := range p.schema.fields {
-		values[name] = p.v.field(f.Name).Interface()
-	}
-	return values
+	return p.schema.mapped(p.v)
 }
 
 // Update saves changes of the object
-func (p *Proxy) Update(db DB, v Values) (bool, error) {
+func (p *Proxy) Update(db DB, v Values) error {
 	return Update(db, p, v)
 }
 
 // Truncate erases all data
 func (p *Proxy) Truncate(db DB) error {
 	return Truncate(db, p)
+}
+
+func (p *Proxy) primary() Values {
+	return p.schema.pk(p.v)
+}
+
+func (p *Proxy) loadBy(db DB, eq Values) error {
+	return p.Find(ByEq(sq.Eq(eq))).Load(db)
 }
 
 func proxyOf(v reflect.Value) *Proxy {

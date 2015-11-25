@@ -174,6 +174,37 @@ func (s *schema) fk(in *schema) *fkopt {
 	return fk.flip()
 }
 
+func (s *schema) field(v value, name string) reflect.Value {
+	f, found := s.fields[name]
+	if !found {
+		log.Panicf(
+			"y/schema: The field \"%s\" not found in table \"%s\".",
+			name, s.table)
+	}
+	return v.field(f.Name)
+}
+
+func (s *schema) pk(v value) Values {
+	pks := Values{}
+	for _, pk := range s.xinfo.pk {
+		pks[pk] = s.field(v, pk).Interface()
+	}
+	if len(pks) == 0 {
+		log.Panicf(
+			"y/schema: No primary key found in the \"%s\".",
+			s.table)
+	}
+	return pks
+}
+
+func (s *schema) mapped(v value) Values {
+	values := make(Values, len(s.fseq))
+	for _, name := range s.fseq {
+		values[name] = s.field(v, name).Interface()
+	}
+	return values
+}
+
 type cache struct {
 	types map[reflect.Type]*schema
 	sync.RWMutex

@@ -78,9 +78,10 @@ func (c *Changer) prepare(clauses sq.Eq, where sq.Eq) sq.UpdateBuilder {
 }
 
 // Update saves object changes in db after version validation
-func (c *Changer) Update(db DB) (updated bool, err error) {
+func (c *Changer) Update(db DB) (err error) {
+	pk := c.proxy.primary()
 	// load origin
-	err = c.proxy.Load(db)
+	err = c.proxy.loadBy(db, pk)
 	if err != nil {
 		return
 	}
@@ -94,16 +95,16 @@ func (c *Changer) Update(db DB) (updated bool, err error) {
 	// set new version
 	clauses[_version] = newv
 	c.proxy.Field(_version).SetInt(newv)
-	// set where condition
-	where := c.primary()
-	where[_version] = oldv
+	// add version to search condition
+	pk[_version] = oldv
 	// save
-	result, err := exec(c.prepare(clauses, where), db)
-	if err != nil {
-		return
+	result, err := exec(c.prepare(clauses, sq.Eq(pk)), db)
+	if err == nil {
+		count, _ := result.RowsAffected()
+		if count != 1 {
+			err = ErrNoAffectedRows
+		}
 	}
-	count, err := result.RowsAffected()
-	updated = count == 1
 	return
 }
 
@@ -112,6 +113,6 @@ func makeChanger(p *Proxy, v Values) *Changer {
 }
 
 // Update saves object changes
-func Update(db DB, p *Proxy, v Values) (bool, error) {
+func Update(db DB, p *Proxy, v Values) error {
 	return makeChanger(p, v).Update(db)
 }
