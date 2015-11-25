@@ -12,10 +12,51 @@ type Changer struct {
 	values Values
 }
 
+// Modifier changes a value for update statement
+type Modifier func(v interface{}) interface{}
+
+// IncrInt returns a modifier for int/int8/int16/int32/int64 increment
+func IncrInt(to interface{}) Modifier {
+	return func(v interface{}) interface{} {
+		if x, ok := v.(int); ok {
+			return x + to.(int)
+		}
+		if x, ok := v.(int8); ok {
+			return x + to.(int8)
+		}
+		if x, ok := v.(int16); ok {
+			return x + to.(int16)
+		}
+		if x, ok := v.(int32); ok {
+			return x + to.(int32)
+		}
+		if x, ok := v.(int64); ok {
+			return x + to.(int64)
+		}
+		panic("y/update: unknown int type for increment.")
+	}
+}
+
+// IncrFloat returns a modifier for float32/float64 increment
+func IncrFloat(to interface{}) Modifier {
+	return func(v interface{}) interface{} {
+		if x, ok := v.(float32); ok {
+			return x + to.(float32)
+		}
+		if x, ok := v.(float64); ok {
+			return x + to.(float64)
+		}
+		panic("y/update: unknown float type for increment.")
+	}
+}
+
 func (c *Changer) modify() sq.Eq {
 	modified := sq.Eq{}
 	for name, val := range c.values {
 		f := c.proxy.Field(name)
+		if modifier, ok := val.(Modifier); ok {
+			val = modifier(f.Interface())
+		}
 		if f.Interface() != val {
 			modified[name] = val
 			f.Set(reflect.ValueOf(val))
