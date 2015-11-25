@@ -102,13 +102,11 @@ type Car struct {
   Versionable
 }
 car := Car{ID: 1}
-updated, err := y.New(&car).Update(db, y.Values{"power": 50})
+err := y.New(&car).Update(db, y.Values{"power": 50})
 if err != nil {
   log.Panicln(err)
 }
-if updated {
-  log.Printf("%#v\n", car)
-}
+log.Printf("%#v\n", car)
 ```  
 
 ### Join
