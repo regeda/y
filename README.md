@@ -35,7 +35,7 @@ type Order struct {
   Price int   `db:"price"`
 }
 c, err := y.New(Order{}).
-  Find(
+  FindBy(
   func(b squirrel.SelectBuilder) squirrel.SelectBuilder {
     return b.Where("price > ?", 10)
   }).

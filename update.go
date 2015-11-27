@@ -65,18 +65,6 @@ func (c *Changer) modify() sq.Eq {
 	return modified
 }
 
-func (c *Changer) primary() sq.Eq {
-	pks := sq.Eq{}
-	for _, pk := range c.proxy.schema.xinfo.pk {
-		pks[pk] = c.proxy.Field(pk).Interface()
-	}
-	return pks
-}
-
-func (c *Changer) prepare(clauses sq.Eq, where sq.Eq) sq.UpdateBuilder {
-	return sq.Update(c.proxy.schema.table).SetMap(clauses).Where(where)
-}
-
 // Update saves object changes in db after version validation
 func (c *Changer) Update(db DB) (err error) {
 	pk := c.proxy.primary()
@@ -98,7 +86,8 @@ func (c *Changer) Update(db DB) (err error) {
 	// add version to search condition
 	pk[_version] = oldv
 	// save
-	result, err := exec(c.prepare(clauses, sq.Eq(pk)), db)
+	result, err := exec(
+		builder{c.proxy.schema}.forUpdate(clauses, sq.Eq(pk)), db)
 	if err == nil {
 		count, _ := result.RowsAffected()
 		if count != 1 {

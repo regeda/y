@@ -27,11 +27,6 @@ type DB interface {
 // Qualifier updates a select builder if you need
 type Qualifier func(sq.SelectBuilder) sq.SelectBuilder
 
-// NoopQualifier returns the select builder "as is"
-var NoopQualifier = func(b sq.SelectBuilder) sq.SelectBuilder {
-	return b
-}
-
 // ByEq returns the filter by squirrel.Eq
 var ByEq = func(eq sq.Eq) Qualifier {
 	return func(b sq.SelectBuilder) sq.SelectBuilder {
@@ -40,7 +35,7 @@ var ByEq = func(eq sq.Eq) Qualifier {
 }
 
 // ByID returns the filter by ID
-var ByID = func(id int64) Qualifier {
+var ByID = func(id interface{}) Qualifier {
 	return ByEq(sq.Eq{"id": id})
 }
 

@@ -7,7 +7,7 @@ import (
 
 var _ = Describe("Collection", func() {
 	type something struct {
-		ID int64 `db:"id"`
+		ID int64 `db:"id,pk"`
 	}
 
 	var (
@@ -50,10 +50,10 @@ var _ = Describe("Collection", func() {
 			ptrs = []interface{}{}
 			for _, id := range []int64{1, 2} {
 				v := p.schema.create().Elem()
-				c.add(v)
 				ptr := v.Addr().Interface().(*something)
 				ptrs = append(ptrs, ptr)
 				ptr.ID = id
+				c.add(v)
 			}
 		})
 

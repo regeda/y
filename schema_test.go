@@ -143,6 +143,10 @@ var _ = Describe("Schema", func() {
 			p = New(something{})
 		})
 
+		It("should contain index opts for 'any_id'", func() {
+			Expect(p.schema.xinfo.idx["any_id"]).To(Equal(1))
+		})
+
 		It("should contain 'any_id' as own key", func() {
 			Expect(p.schema.fks["any"].from).To(Equal("any_id"))
 		})
@@ -159,6 +163,10 @@ var _ = Describe("Schema", func() {
 
 		BeforeEach(func() {
 			p = New(something{})
+		})
+
+		It("should contain index opts for 'aid'", func() {
+			Expect(p.schema.xinfo.idx["aid"]).To(Equal(1))
 		})
 
 		It("should contain 'aid' as own key", func() {

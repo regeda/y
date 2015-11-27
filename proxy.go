@@ -17,14 +17,24 @@ func (p *Proxy) Put(db DB) (int64, error) {
 	return Put(db, p)
 }
 
-// Fetch returns a collection of objects
-func (p *Proxy) Fetch(db DB) (*Collection, error) {
-	return p.Find(NoopQualifier).Fetch(db)
+// Query returns Finder with a custom query
+func (p *Proxy) Query(b sq.SelectBuilder) *Finder {
+	return makeFinder(p, b)
 }
 
-// Find returns Finder
-func (p *Proxy) Find(q Qualifier) *Finder {
-	return makeFinder(p, q)
+// Fetch returns a collection of objects
+func (p *Proxy) Fetch(db DB) (*Collection, error) {
+	return p.Find().Fetch(db)
+}
+
+// FindBy returns Finder with qualified query
+func (p *Proxy) FindBy(q Qualifier) *Finder {
+	return p.Find().Qualify(q)
+}
+
+// Find returns Finder with qualified query
+func (p *Proxy) Find() *Finder {
+	return p.Query(builder{p.schema}.forFinder())
 }
 
 // Collection creates an empty collection of the object
@@ -38,7 +48,7 @@ func (p *Proxy) Join(db DB, in *Collection) (*Collection, error) {
 
 	idx := in.getIdx(fk.target)
 
-	c, err := p.Find(ByEq(sq.Eq{fk.from: idx.keys})).Fetch(db)
+	c, err := p.findByEq(sq.Eq{fk.from: idx.keys}).Fetch(db)
 	if err != nil {
 		return nil, err
 	}
@@ -78,12 +88,16 @@ func (p *Proxy) Truncate(db DB) error {
 	return Truncate(db, p)
 }
 
+func (p *Proxy) findByEq(eq sq.Eq) *Finder {
+	return p.FindBy(ByEq(eq))
+}
+
 func (p *Proxy) primary() Values {
 	return p.schema.pk(p.v)
 }
 
 func (p *Proxy) loadBy(db DB, eq Values) error {
-	return p.Find(ByEq(sq.Eq(eq))).Load(db)
+	return p.findByEq(sq.Eq(eq)).Load(db)
 }
 
 func proxyOf(v reflect.Value) *Proxy {
