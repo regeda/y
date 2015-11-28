@@ -25,13 +25,13 @@ var _ = Describe("Collection", func() {
 	})
 
 	Context("when one item added", func() {
-		var ptr *something
+		var ptr interface{}
 
 		BeforeEach(func() {
-			v := p.schema.create().Elem()
-			ptr = v.Addr().Interface().(*something)
-			ptr.ID = 1
-			c.add(v)
+			v := p.schema.create()
+			v.field("ID").SetInt(1)
+			v.deploy(c)
+			ptr = v.ptr().Interface()
 		})
 
 		It("should be non-empty", func() {
@@ -49,11 +49,10 @@ var _ = Describe("Collection", func() {
 		BeforeEach(func() {
 			ptrs = []interface{}{}
 			for _, id := range []int64{1, 2} {
-				v := p.schema.create().Elem()
-				ptr := v.Addr().Interface().(*something)
-				ptrs = append(ptrs, ptr)
-				ptr.ID = id
-				c.add(v)
+				v := p.schema.create()
+				v.field("ID").SetInt(id)
+				v.deploy(c)
+				ptrs = append(ptrs, v.ptr().Interface())
 			}
 		})
 

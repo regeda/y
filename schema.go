@@ -149,8 +149,8 @@ func (s *schema) set(ptrs []interface{}, v value) {
 	}
 }
 
-func (s *schema) create() reflect.Value {
-	return reflect.New(s.t)
+func (s *schema) create() value {
+	return singular{reflect.New(s.t).Elem()}
 }
 
 func (s *schema) parse() {

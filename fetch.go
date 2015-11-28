@@ -32,10 +32,10 @@ func (f *Finder) Fetch(db DB) (*Collection, error) {
 	c := f.proxy.Collection()
 	ptrs := f.proxy.schema.ptrs()
 	for rows.Next() {
-		v := f.proxy.schema.create().Elem()
-		f.proxy.schema.set(ptrs, singular{v})
+		v := f.proxy.schema.create()
+		f.proxy.schema.set(ptrs, v)
 		rows.Scan(ptrs...)
-		c.add(v)
+		v.deploy(c)
 	}
 	return c, nil
 }

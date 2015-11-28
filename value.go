@@ -4,9 +4,11 @@ import "reflect"
 
 type value interface {
 	put(DB, *schema) (int64, error)
+	ptr() reflect.Value
 	field(string) reflect.Value
 	index(int) value
 	size() int
+	deploy(*Collection)
 }
 
 type singular struct {
@@ -25,6 +27,14 @@ func (v singular) size() int {
 	panic("y/value: singular value doesn't support size method.")
 }
 
+func (v singular) deploy(c *Collection) {
+	c.add(v.Value)
+}
+
+func (v singular) ptr() reflect.Value {
+	return v.Addr()
+}
+
 type plural struct {
 	reflect.Value
 }
@@ -39,4 +49,14 @@ func (v plural) index(i int) value {
 
 func (v plural) size() int {
 	return v.Len()
+}
+
+func (v plural) deploy(c *Collection) {
+	for i, l := 0, v.size(); i < l; i++ {
+		v.index(i).deploy(c)
+	}
+}
+
+func (v plural) ptr() reflect.Value {
+	return v.Addr()
 }

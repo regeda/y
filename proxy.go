@@ -37,9 +37,16 @@ func (p *Proxy) Find() *Finder {
 	return p.Query(builder{p.schema}.forFinder())
 }
 
-// Collection creates an empty collection of the object
+// Collection returns a blank collection of proxy type
 func (p *Proxy) Collection() *Collection {
 	return makeCollection(p)
+}
+
+// Deploy creates a collection of proxy values
+func (p *Proxy) Deploy() *Collection {
+	c := p.Collection()
+	p.v.deploy(c)
+	return c
 }
 
 // Join adds related collection to self
