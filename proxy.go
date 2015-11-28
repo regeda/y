@@ -37,15 +37,10 @@ func (p *Proxy) Find() *Finder {
 	return p.Query(builder{p.schema}.forFinder())
 }
 
-// Collection returns a blank collection of proxy type
+// Collection creates a collection of proxy values
 func (p *Proxy) Collection() *Collection {
-	return makeCollection(p)
-}
-
-// Deploy creates a collection of proxy values
-func (p *Proxy) Deploy() *Collection {
-	c := p.Collection()
-	p.v.deploy(c)
+	c := p.blankCollection()
+	p.v.addTo(c)
 	return c
 }
 
@@ -93,6 +88,10 @@ func (p *Proxy) Update(db DB, v Values) error {
 // Truncate erases all data
 func (p *Proxy) Truncate(db DB) error {
 	return Truncate(db, p)
+}
+
+func (p *Proxy) blankCollection() *Collection {
+	return makeCollection(p)
 }
 
 func (p *Proxy) findByEq(eq sq.Eq) *Finder {

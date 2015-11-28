@@ -87,7 +87,7 @@ var _ = Describe("Schema", func() {
 		})
 
 		It("should contains enabled autoincr in field opts", func() {
-			Expect(p.schema.fields["id"].opts.autoincr).To(BeTrue())
+			Expect(p.schema.fields["id"].autoincr).To(BeTrue())
 		})
 	})
 

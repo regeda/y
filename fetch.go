@@ -29,13 +29,13 @@ func (f *Finder) Fetch(db DB) (*Collection, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	c := f.proxy.Collection()
+	c := f.proxy.blankCollection()
 	ptrs := f.proxy.schema.ptrs()
 	for rows.Next() {
 		v := f.proxy.schema.create()
 		f.proxy.schema.set(ptrs, v)
 		rows.Scan(ptrs...)
-		v.deploy(c)
+		v.addTo(c)
 	}
 	return c, nil
 }

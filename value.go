@@ -8,7 +8,7 @@ type value interface {
 	field(string) reflect.Value
 	index(int) value
 	size() int
-	deploy(*Collection)
+	addTo(*Collection)
 }
 
 type singular struct {
@@ -27,7 +27,7 @@ func (v singular) size() int {
 	panic("y/value: singular value doesn't support size method.")
 }
 
-func (v singular) deploy(c *Collection) {
+func (v singular) addTo(c *Collection) {
 	c.add(v.Value)
 }
 
@@ -51,9 +51,9 @@ func (v plural) size() int {
 	return v.Len()
 }
 
-func (v plural) deploy(c *Collection) {
+func (v plural) addTo(c *Collection) {
 	for i, l := 0, v.size(); i < l; i++ {
-		v.index(i).deploy(c)
+		v.index(i).addTo(c)
 	}
 }
 

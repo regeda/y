@@ -28,7 +28,7 @@ func (v plural) put(db DB, s *schema) (int64, error) {
 func (v singular) put(db DB, s *schema) (int64, error) {
 	set := sq.Eq{}
 	for name, f := range s.fields {
-		if !f.opts.autoincr {
+		if !f.autoincr {
 			set[name] = v.field(f.Name).Interface()
 		}
 	}
@@ -38,7 +38,7 @@ func (v singular) put(db DB, s *schema) (int64, error) {
 	}
 	for _, pk := range s.xinfo.pk {
 		f := s.fields[pk]
-		if f.opts.autoincr {
+		if f.autoincr {
 			id, _ := result.LastInsertId()
 			v.field(f.Name).SetInt(id)
 			break

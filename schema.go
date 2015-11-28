@@ -9,13 +9,9 @@ import (
 
 const _version = "_version"
 
-type fieldopts struct {
-	autoincr bool
-}
-
 type field struct {
 	reflect.StructField
-	opts *fieldopts
+	autoincr bool
 }
 
 type xinfo struct {
@@ -68,15 +64,15 @@ type schema struct {
 	fks    map[string]*fkopt
 }
 
-func (s *schema) parseopts(xopts []string) *fieldopts {
-	opts := new(fieldopts)
+func (s *schema) parseField(r reflect.StructField, xopts []string) *field {
+	f := &field{StructField: r}
 	for _, opt := range xopts {
 		switch opt {
 		// parse lonely options
 		case "pk":
 			s.xinfo.addpk(xopts[0])
 		case "autoincr":
-			opts.autoincr = true
+			f.autoincr = true
 		// parse extended options
 		default:
 			ext := strings.Split(opt, ":")
@@ -105,7 +101,7 @@ func (s *schema) parseopts(xopts []string) *fieldopts {
 			}
 		}
 	}
-	return opts
+	return f
 }
 
 func (s *schema) parseName(t reflect.Type) {
@@ -131,10 +127,7 @@ func (s *schema) parseFields(t reflect.Type) {
 			xopts[0] = underscore(f.Name)
 		}
 		s.fseq = append(s.fseq, xopts[0])
-		s.fields[xopts[0]] = &field{
-			f,
-			s.parseopts(xopts),
-		}
+		s.fields[xopts[0]] = s.parseField(f, xopts)
 	}
 }
 

@@ -17,7 +17,7 @@ var _ = Describe("Collection", func() {
 
 	BeforeEach(func() {
 		p = New(something{})
-		c = p.Collection()
+		c = p.blankCollection()
 	})
 
 	It("should be empty", func() {
@@ -30,7 +30,7 @@ var _ = Describe("Collection", func() {
 		BeforeEach(func() {
 			v := p.schema.create()
 			v.field("ID").SetInt(1)
-			v.deploy(c)
+			v.addTo(c)
 			ptr = v.ptr().Interface()
 		})
 
@@ -51,7 +51,7 @@ var _ = Describe("Collection", func() {
 			for _, id := range []int64{1, 2} {
 				v := p.schema.create()
 				v.field("ID").SetInt(id)
-				v.deploy(c)
+				v.addTo(c)
 				ptrs = append(ptrs, v.ptr().Interface())
 			}
 		})
