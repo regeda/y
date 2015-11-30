@@ -109,6 +109,21 @@ if err != nil {
 log.Printf("%#v\n", car)
 ```  
 
+### Delete
+**Delete** executes ```DELETE``` statement. The action removes an object by primary keys.
+```go
+type Account struct {
+	ID    int64 `db:",pk"`
+	Email string
+}
+acc := Account{ID: 1}
+affected, err := y.New(acc).Delete(db)
+if err != nil {
+  log.Panicln(err)
+}
+log.Printf("Affected rows: %d\n", affected)
+```
+
 ### Join
 **Join** builds relations by foreign keys
 ```go
@@ -134,4 +149,3 @@ if !users.Empty() {
 
 ## TODO
 - [ ] More tests!
-- [ ] Add **Delete** action

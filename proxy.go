@@ -90,6 +90,16 @@ func (p *Proxy) Truncate(db DB) error {
 	return Truncate(db, p)
 }
 
+// Delete removes a proxy by primary
+func (p *Proxy) Delete(db DB) (int64, error) {
+	return p.DeleteBy(db, p.primary())
+}
+
+// DeleteBy removes a proxy by values
+func (p *Proxy) DeleteBy(db DB, by Values) (int64, error) {
+	return DeleteBy(db, p, by)
+}
+
 func (p *Proxy) blankCollection() *Collection {
 	return makeCollection(p)
 }

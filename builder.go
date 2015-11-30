@@ -15,3 +15,7 @@ func (b builder) forFinder() sq.SelectBuilder {
 func (b builder) forUpdate(set sq.Eq, where sq.Eq) sq.UpdateBuilder {
 	return sq.Update(b.table).SetMap(set).Where(where)
 }
+
+func (b builder) forDelete(where sq.Eq) sq.DeleteBuilder {
+	return sq.Delete(b.table).Where(where)
+}
