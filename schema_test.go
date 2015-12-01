@@ -28,7 +28,7 @@ var _ = Describe("Schema", func() {
 
 	Context("when a struct has disabled field", func() {
 		type something struct {
-			ID int64 `db:"-"`
+			ID int64 `y:"-"`
 		}
 
 		BeforeEach(func() {
@@ -42,7 +42,7 @@ var _ = Describe("Schema", func() {
 
 	Context("when a struct has a primary key without name", func() {
 		type something struct {
-			ID int64 `db:",pk"`
+			ID int64 `y:",pk"`
 		}
 
 		BeforeEach(func() {
@@ -56,8 +56,8 @@ var _ = Describe("Schema", func() {
 
 	Context("when a struct has a composite primary key", func() {
 		type something struct {
-			X int64 `db:"x,pk"`
-			Y int64 `db:"y,pk"`
+			X int64 `y:"x,pk"`
+			Y int64 `y:"y,pk"`
 		}
 
 		BeforeEach(func() {
@@ -79,7 +79,7 @@ var _ = Describe("Schema", func() {
 
 	Context("when a struct has an auto-incremented key", func() {
 		type something struct {
-			ID int64 `db:",autoincr"`
+			ID int64 `y:",autoincr"`
 		}
 
 		BeforeEach(func() {
@@ -136,7 +136,7 @@ var _ = Describe("Schema", func() {
 
 	Context("when a struct has a foreign key", func() {
 		type something struct {
-			AnyID int64 `db:",fk"`
+			AnyID int64 `y:",fk"`
 		}
 
 		BeforeEach(func() {
@@ -158,7 +158,7 @@ var _ = Describe("Schema", func() {
 
 	Context("when a struct has overrided foreign key", func() {
 		type something struct {
-			AnyID int64 `db:"aid,fk:any.id"`
+			AnyID int64 `y:"aid,fk:any.id"`
 		}
 
 		BeforeEach(func() {

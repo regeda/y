@@ -7,7 +7,7 @@ import (
 
 var _ = Describe("Collection", func() {
 	type something struct {
-		ID int64 `db:"id,pk"`
+		ID int64 `y:"id,pk"`
 	}
 
 	var (

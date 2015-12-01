@@ -111,7 +111,7 @@ func (s *schema) parseName(t reflect.Type) {
 func (s *schema) parseFields(t reflect.Type) {
 	for i, l := 0, t.NumField(); i < l; i++ {
 		f := t.Field(i)
-		col := f.Tag.Get("db")
+		col := f.Tag.Get("y")
 		if col == "-" {
 			continue
 		}
