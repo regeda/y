@@ -48,7 +48,7 @@ func (p *Proxy) Collection() *Collection {
 func (p *Proxy) Join(db DB, in *Collection) (*Collection, error) {
 	fk := p.schema.fk(in.schema)
 
-	idx := in.getIdx(fk.target)
+	idx := in.lookidx(fk.target)
 
 	c, err := p.findByEq(sq.Eq{fk.from: idx.keys}).Fetch(db)
 	if err != nil {
@@ -72,7 +72,7 @@ func (p *Proxy) Version() int64 {
 
 // Field returns reflected field by name
 func (p *Proxy) Field(name string) reflect.Value {
-	return p.schema.field(p.v, name)
+	return p.schema.fval(p.v, name)
 }
 
 // Map returns a simple map of struct values
@@ -120,9 +120,6 @@ func proxyOf(v reflect.Value) *Proxy {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		return &Proxy{plural{v}, loadSchema(v.Type().Elem())}
-	case reflect.Ptr:
-		v = v.Elem()
-		fallthrough
 	default:
 		return &Proxy{singular{v}, loadSchema(v.Type())}
 	}

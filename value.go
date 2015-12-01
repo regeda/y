@@ -4,8 +4,8 @@ import "reflect"
 
 type value interface {
 	put(DB, *schema) (int64, error)
-	ptr() reflect.Value
 	field(string) reflect.Value
+	addr() reflect.Value
 	index(int) value
 	size() int
 	addTo(*Collection)
@@ -16,7 +16,17 @@ type singular struct {
 }
 
 func (v singular) field(name string) reflect.Value {
+	if v.Kind() == reflect.Ptr {
+		return v.Elem().FieldByName(name)
+	}
 	return v.FieldByName(name)
+}
+
+func (v singular) addr() reflect.Value {
+	if v.Kind() == reflect.Ptr {
+		return v.Value
+	}
+	return v.Addr()
 }
 
 func (v singular) index(i int) value {
@@ -28,11 +38,7 @@ func (v singular) size() int {
 }
 
 func (v singular) addTo(c *Collection) {
-	c.add(v.Value)
-}
-
-func (v singular) ptr() reflect.Value {
-	return v.Addr()
+	c.add(v)
 }
 
 type plural struct {
@@ -41,6 +47,10 @@ type plural struct {
 
 func (v plural) field(name string) reflect.Value {
 	panic("y/value: plural value doesn't support field method.")
+}
+
+func (v plural) addr() reflect.Value {
+	panic("y/value: plural value doesn't support addr method.")
 }
 
 func (v plural) index(i int) value {
@@ -55,8 +65,4 @@ func (v plural) addTo(c *Collection) {
 	for i, l := 0, v.size(); i < l; i++ {
 		v.index(i).addTo(c)
 	}
-}
-
-func (v plural) ptr() reflect.Value {
-	return v.Addr()
 }

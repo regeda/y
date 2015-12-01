@@ -31,7 +31,7 @@ type Collection struct {
 	schema *schema
 }
 
-func (c *Collection) getIdx(name string) *index {
+func (c *Collection) lookidx(name string) *index {
 	idx, ok := c.idx[name]
 	if !ok {
 		log.Panicf(
@@ -41,21 +41,13 @@ func (c *Collection) getIdx(name string) *index {
 	return idx
 }
 
-func (c *Collection) createIdx(name string) *index {
-	if idx, ok := c.idx[name]; ok {
-		return idx
-	}
-	c.idx[name] = makeIndex()
-	return c.idx[name]
-}
-
-func (c *Collection) add(v reflect.Value) {
+func (c *Collection) add(v value) {
 	cell := len(c.items)
-	c.items = append(c.items, v.Addr())
+	c.items = append(c.items, v.addr())
 
 	for name := range c.schema.xinfo.idx {
-		key := v.FieldByName(c.schema.fields[name].Name).Int()
-		c.createIdx(name).add(key, cell)
+		key := c.schema.fval(v, name).Int()
+		c.lookidx(name).add(key, cell)
 	}
 }
 
@@ -65,6 +57,12 @@ func (c *Collection) cells(cells []int) []reflect.Value {
 		items[i] = c.items[cell]
 	}
 	return items
+}
+
+// Exists returns true if a value existed in the index
+func (c *Collection) Exists(name string, v int64) (ok bool) {
+	_, ok = c.lookidx(name).cells[v]
+	return
 }
 
 // Empty returns false if no items exist
@@ -83,20 +81,21 @@ func (c *Collection) Size() int {
 }
 
 // List returns all items
-func (c *Collection) List() []interface{} {
-	items := make([]interface{}, c.Size())
+func (c *Collection) List() interface{} {
+	size := c.Size()
+	items := reflect.MakeSlice(c.schema.sliceOf(), size, size)
 	for i, item := range c.items {
-		items[i] = item.Interface()
+		items.Index(i).Set(item)
 	}
-	return items
+	return items.Interface()
 }
 
 // Join links related collection
 func (c *Collection) Join(j *Collection) {
 	fk := j.schema.fk(c.schema)
 
-	cidx := c.getIdx(fk.target)
-	jidx := j.getIdx(fk.from)
+	cidx := c.lookidx(fk.target)
+	jidx := j.lookidx(fk.from)
 
 	name := j.schema.t.Name()
 
@@ -122,8 +121,13 @@ func (c *Collection) Join(j *Collection) {
 }
 
 func makeCollection(p *Proxy) *Collection {
+	// create the index map
+	idx := make(map[string]*index)
+	for name := range p.schema.xinfo.idx {
+		idx[name] = makeIndex()
+	}
 	return &Collection{
-		idx:    make(map[string]*index),
+		idx:    idx,
 		schema: p.schema,
 	}
 }

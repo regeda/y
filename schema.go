@@ -167,20 +167,25 @@ func (s *schema) fk(in *schema) *fkopt {
 	return fk.flip()
 }
 
-func (s *schema) field(v value, name string) reflect.Value {
+func (s *schema) field(name string) *field {
 	f, found := s.fields[name]
 	if !found {
 		log.Panicf(
 			"y/schema: The field \"%s\" not found in table \"%s\".",
 			name, s.table)
 	}
+	return f
+}
+
+func (s *schema) fval(v value, name string) reflect.Value {
+	f := s.field(name)
 	return v.field(f.Name)
 }
 
 func (s *schema) pk(v value) Values {
 	pks := Values{}
 	for _, pk := range s.xinfo.pk {
-		pks[pk] = s.field(v, pk).Interface()
+		pks[pk] = s.fval(v, pk).Interface()
 	}
 	if len(pks) == 0 {
 		log.Panicf(
@@ -193,9 +198,13 @@ func (s *schema) pk(v value) Values {
 func (s *schema) mapped(v value) Values {
 	values := make(Values, len(s.fseq))
 	for _, name := range s.fseq {
-		values[name] = s.field(v, name).Interface()
+		values[name] = s.fval(v, name).Interface()
 	}
 	return values
+}
+
+func (s *schema) sliceOf() reflect.Type {
+	return reflect.SliceOf(reflect.PtrTo(s.t))
 }
 
 type cache struct {
@@ -219,6 +228,9 @@ func newSchema(t reflect.Type) *schema {
 }
 
 func loadSchema(t reflect.Type) *schema {
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
 	if t.Kind() != reflect.Struct {
 		log.Panicln("y/schema: Y supports Struct type only.")
 	}

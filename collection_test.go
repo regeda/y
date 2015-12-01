@@ -10,28 +10,15 @@ var _ = Describe("Collection", func() {
 		ID int64 `y:"id,pk"`
 	}
 
-	var (
-		c *Collection
-		p *Proxy
-	)
-
-	BeforeEach(func() {
-		p = New(something{})
-		c = p.blankCollection()
-	})
-
-	It("should be empty", func() {
-		Expect(c.Empty()).To(BeTrue())
-	})
-
 	Context("when one item added", func() {
-		var ptr interface{}
+		var (
+			ptr *something
+			c   *Collection
+		)
 
 		BeforeEach(func() {
-			v := p.schema.create()
-			v.field("ID").SetInt(1)
-			v.addTo(c)
-			ptr = v.ptr().Interface()
+			ptr = &something{ID: 1}
+			c = New(ptr).Collection()
 		})
 
 		It("should be non-empty", func() {
@@ -44,16 +31,18 @@ var _ = Describe("Collection", func() {
 	})
 
 	Context("when two items added", func() {
-		var ptrs []interface{}
+		var (
+			ptrs []*something
+			c    *Collection
+		)
 
 		BeforeEach(func() {
-			ptrs = []interface{}{}
-			for _, id := range []int64{1, 2} {
-				v := p.schema.create()
-				v.field("ID").SetInt(id)
-				v.addTo(c)
-				ptrs = append(ptrs, v.ptr().Interface())
+			ptrs = make([]*something, 2)
+			for i, id := range []int64{1, 2} {
+				ptr := &something{ID: id}
+				ptrs[i] = ptr
 			}
+			c = New(ptrs).Collection()
 		})
 
 		It("should contain two items", func() {
