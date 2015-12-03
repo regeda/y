@@ -51,21 +51,21 @@ type fkopt struct {
 	from   string
 }
 
-func (f fkopt) flip() *fkopt {
-	return &fkopt{f.from, f.target}
+func (f fkopt) flip() fkopt {
+	return fkopt{f.from, f.target}
 }
 
 type schema struct {
 	t      reflect.Type
 	table  string
-	fields map[string]*field
+	fields map[string]field
 	fseq   fseq
 	xinfo  *xinfo
-	fks    map[string]*fkopt
+	fks    map[string]fkopt
 }
 
-func (s *schema) parseField(r reflect.StructField, xopts []string) *field {
-	f := &field{StructField: r}
+func (s *schema) parseField(r reflect.StructField, xopts []string) field {
+	f := field{StructField: r}
 	for _, opt := range xopts {
 		switch opt {
 		// parse lonely options
@@ -93,7 +93,7 @@ func (s *schema) parseField(r reflect.StructField, xopts []string) *field {
 				if len(fkopts) != 2 {
 					log.Panicf("y/schema: Couldn't parse foreign key from \"%s\".", fk)
 				}
-				s.fks[fkopts[0]] = &fkopt{
+				s.fks[fkopts[0]] = fkopt{
 					target: fkopts[1],
 					from:   xopts[0],
 				}
@@ -143,7 +143,7 @@ func (s *schema) set(ptrs []interface{}, v value) {
 }
 
 func (s *schema) create() value {
-	return singular{reflect.New(s.t).Elem()}
+	return valueOf(reflect.New(s.t))
 }
 
 func (s *schema) parse() {
@@ -151,7 +151,7 @@ func (s *schema) parse() {
 	s.parseFields(s.t)
 }
 
-func (s *schema) fk(in *schema) *fkopt {
+func (s *schema) fk(in schema) fkopt {
 	// forward
 	fk, ok := s.fks[in.table]
 	if ok {
@@ -167,7 +167,7 @@ func (s *schema) fk(in *schema) *fkopt {
 	return fk.flip()
 }
 
-func (s *schema) field(name string) *field {
+func (s *schema) field(name string) field {
 	f, found := s.fields[name]
 	if !found {
 		log.Panicf(
@@ -207,30 +207,27 @@ func (s *schema) sliceOf() reflect.Type {
 	return reflect.SliceOf(reflect.PtrTo(s.t))
 }
 
-type cache struct {
-	types map[reflect.Type]*schema
-	sync.RWMutex
-}
-
-var loaded = cache{
-	types: make(map[reflect.Type]*schema),
-}
-
-func newSchema(t reflect.Type) *schema {
-	s := &schema{
+func makeSchema(t reflect.Type) schema {
+	s := schema{
 		t:      t,
-		fields: make(map[string]*field),
+		fields: make(map[string]field),
 		xinfo:  newxinfo(),
-		fks:    make(map[string]*fkopt),
+		fks:    make(map[string]fkopt),
 	}
 	s.parse()
 	return s
 }
 
-func loadSchema(t reflect.Type) *schema {
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
+type cache struct {
+	types map[reflect.Type]schema
+	sync.RWMutex
+}
+
+var loaded = cache{
+	types: make(map[reflect.Type]schema),
+}
+
+func schemaOf(t reflect.Type) schema {
 	if t.Kind() != reflect.Struct {
 		log.Panicln("y/schema: Y supports Struct type only.")
 	}
@@ -244,7 +241,7 @@ func loadSchema(t reflect.Type) *schema {
 
 	loaded.Lock()
 	defer loaded.Unlock()
-	s = newSchema(t)
+	s = makeSchema(t)
 	loaded.types[t] = s
 	return s
 }

@@ -28,7 +28,7 @@ func makeIndex() *index {
 type Collection struct {
 	items  []reflect.Value
 	idx    map[string]*index
-	schema *schema
+	schema schema
 }
 
 func (c *Collection) lookidx(name string) *index {

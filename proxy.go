@@ -9,7 +9,7 @@ import (
 // Proxy contains a schema of a type
 type Proxy struct {
 	v      value
-	schema *schema
+	schema schema
 }
 
 // Put creates a new object
@@ -117,10 +117,6 @@ func (p *Proxy) loadBy(db DB, eq Values) error {
 }
 
 func proxyOf(v reflect.Value) *Proxy {
-	switch v.Kind() {
-	case reflect.Array, reflect.Slice:
-		return &Proxy{plural{v}, loadSchema(v.Type().Elem())}
-	default:
-		return &Proxy{singular{v}, loadSchema(v.Type())}
-	}
+	val := valueOf(v)
+	return &Proxy{val, schemaOf(val.typo())}
 }

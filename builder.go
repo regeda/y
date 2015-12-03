@@ -3,7 +3,7 @@ package y
 import sq "github.com/lann/squirrel"
 
 type builder struct {
-	*schema
+	schema
 }
 
 func (b builder) forFinder() sq.SelectBuilder {
