@@ -23,6 +23,13 @@ type Versionable struct {
 	Version sql.NullInt64 `json:"-" y:"_version"`
 }
 
+// MakeVersionable inits a new version
+func MakeVersionable(n int64) Versionable {
+	return Versionable{
+		sql.NullInt64{Int64: 1, Valid: true},
+	}
+}
+
 // DB describes db operations
 type DB interface {
 	Execer
