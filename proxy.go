@@ -1,6 +1,7 @@
 package y
 
 import (
+	"database/sql"
 	"reflect"
 
 	sq "github.com/lann/squirrel"
@@ -65,9 +66,13 @@ func (p *Proxy) Load(db DB) error {
 	return p.loadBy(db, p.primary())
 }
 
-// Version returns a revision of object
-func (p *Proxy) Version() int64 {
-	return p.Field(_version).Int()
+// MustLoad fetches an object and panic if an error occurred
+func (p *Proxy) MustLoad(db DB) *Proxy {
+	err := p.Load(db)
+	if err != nil {
+		panic(err.Error())
+	}
+	return p
 }
 
 // Field returns reflected field by name
@@ -110,6 +115,10 @@ func (p *Proxy) findByEq(eq sq.Eq) *Finder {
 
 func (p *Proxy) primary() Values {
 	return p.schema.pk(p.v)
+}
+
+func (p *Proxy) version() *sql.NullInt64 {
+	return p.Field(_version).Addr().Interface().(*sql.NullInt64)
 }
 
 func (p *Proxy) loadBy(db DB, eq Values) error {

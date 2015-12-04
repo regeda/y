@@ -18,6 +18,11 @@ type Queryer interface {
 	QueryRow(string, ...interface{}) *sql.Row
 }
 
+// Versionable mixins a version to a model
+type Versionable struct {
+	Version sql.NullInt64 `json:"-" y:"_version"`
+}
+
 // DB describes db operations
 type DB interface {
 	Execer

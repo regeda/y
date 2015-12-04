@@ -93,16 +93,14 @@ log.Printf("%#v\n", affected)
 ### Update
 **Update** executes ```UPDATE``` statement. The action compares origin and modified objects by their version in the database.
 ```go
-type Versionable struct {
-  Version int `db:"_version"`
-}
 type Car struct {
   ID    int64 `db:"id,pk"`
   Power int   `db:"power"`
-  Versionable
+  y.Versionable
 }
+var err error
 car := Car{ID: 1}
-err := y.New(&car).Update(db, y.Values{"power": 50})
+err = y.New(&car).MustLoad(db).Update(db, y.Values{"power": 50})
 if err != nil {
   log.Panicln(err)
 }

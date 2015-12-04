@@ -1,16 +1,11 @@
 package y
 
 import (
+	"log"
 	"reflect"
 
 	sq "github.com/lann/squirrel"
 )
-
-// Changer updates object values
-type Changer struct {
-	proxy  *Proxy
-	values Values
-}
 
 // Modifier changes a value for update statement
 type Modifier func(v interface{}) interface{}
@@ -50,8 +45,15 @@ func IncrFloat(to interface{}) Modifier {
 	}
 }
 
+// Changer updates object values
+type Changer struct {
+	proxy  *Proxy
+	values Values
+}
+
 func (c *Changer) modify() sq.Eq {
 	modified := sq.Eq{}
+	delete(c.values, _version)
 	for name, val := range c.values {
 		f := c.proxy.Field(name)
 		if modifier, ok := val.(Modifier); ok {
@@ -67,24 +69,22 @@ func (c *Changer) modify() sq.Eq {
 
 // Update saves object changes in db after version validation
 func (c *Changer) Update(db DB) (err error) {
-	pk := c.proxy.primary()
-	// load origin
-	err = c.proxy.loadBy(db, pk)
-	if err != nil {
-		return
+	version := c.proxy.version()
+	if !version.Valid {
+		log.Panicf(
+			"y/update: You must load \"%s\" before update it", c.proxy.schema.table)
 	}
-	oldv := c.proxy.Version()
-	newv := oldv + 1
+	pk := c.proxy.primary()
+	// add old version to search condition
+	pk[_version] = version.Int64
 	// find changes
 	clauses := c.modify()
 	if len(clauses) == 0 {
 		return
 	}
 	// set new version
-	clauses[_version] = newv
-	c.proxy.Field(_version).SetInt(newv)
-	// add version to search condition
-	pk[_version] = oldv
+	version.Int64++
+	clauses[_version] = version.Int64
 	// save
 	result, err := exec(
 		builder{c.proxy.schema}.forUpdate(clauses, sq.Eq(pk)), db)
