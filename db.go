@@ -26,7 +26,7 @@ type Versionable struct {
 // MakeVersionable inits a new version
 func MakeVersionable(n int64) Versionable {
 	return Versionable{
-		sql.NullInt64{Int64: 1, Valid: true},
+		sql.NullInt64{Int64: n, Valid: true},
 	}
 }
 
