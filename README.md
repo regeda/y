@@ -17,8 +17,8 @@ go get github.com/Repo2/y
 **Fetch** executes ```SELECT``` statement and returns a collection of objects.
 ```go
 type Account struct {
-  ID   int64  `db:"id,pk"`
-  Name string `db:"name"`
+  ID   int64  `y:"id,pk"`
+  Name string `y:"name"`
 }
 c, err := y.New(Account{}).Fetch(db)
 if err != nil {
@@ -31,8 +31,8 @@ log.Printf("%#v\n", c.List())
 **Find** modifies a query for custom selection.
 ```go
 type Order struct {
-  ID    int64 `db:"id,pk"`
-  Price int   `db:"price"`
+  ID    int64 `y:"id,pk"`
+  Price int   `y:"price"`
 }
 c, err := y.New(Order{}).
   FindBy(
@@ -50,8 +50,8 @@ log.Printf("%#v\n", c.List())
 **Load** executes ```SELECT``` statement for one row and loads the object in self.
 ```go
 type Todo struct {
-  ID    int64  `db:"id,pk"`
-  Title string `db:"title"`
+  ID    int64  `y:"id,pk"`
+  Title string `y:"title"`
 }
 todo := Todo{ID: 1}
 err := y.New(&todo).Load(db)
@@ -65,8 +65,8 @@ log.Printf("%#v\n", todo)
 **Put** executes ```INSERT``` statement and assigns auto-increment value.
 ```go
 type User struct {
-  ID   int64  `db:"id,pk,autoincr"`
-  Name string `db:"name"`
+  ID   int64  `y:"id,pk,autoincr"`
+  Name string `y:"name"`
 }
 user := User{Name: "Harry"}
 _, err := y.New(&user).Put(db)
@@ -94,8 +94,8 @@ log.Printf("%#v\n", affected)
 **Update** executes ```UPDATE``` statement. The action compares origin and modified objects by their version in the database.
 ```go
 type Car struct {
-  ID    int64 `db:"id,pk"`
-  Power int   `db:"power"`
+  ID    int64 `y:"id,pk"`
+  Power int   `y:"power"`
   y.Versionable
 }
 var err error
@@ -111,7 +111,7 @@ log.Printf("%#v\n", car)
 **Delete** executes ```DELETE``` statement. The action removes an object by primary keys.
 ```go
 type Account struct {
-	ID    int64 `db:",pk"`
+	ID    int64 `y:",pk"`
 	Email string
 }
 acc := Account{ID: 1}
@@ -126,13 +126,13 @@ log.Printf("Affected rows: %d\n", affected)
 **Join** builds relations by foreign keys
 ```go
 type Device struct {
-  ID     int64 `db:",pk"`
-  UserID int64 `db:",fk"`
+  ID     int64 `y:",pk"`
+  UserID int64 `y:",fk"`
   Name   string
 }
 type User struct {
-  ID          int64     `db:"id,pk"`
-  DeviceArray []*Device `db:"-"`
+  ID          int64     `y:"id,pk"`
+  DeviceArray []*Device `y:"-"`
 }
 users, err := y.New(User{}).Fetch(db)
 if err != nil {
