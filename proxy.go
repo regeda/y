@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"reflect"
 
-	sq "github.com/lann/squirrel"
+	sq "github.com/Masterminds/squirrel"
 )
 
 // Proxy contains a schema of a type

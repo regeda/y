@@ -1,7 +1,7 @@
 package y
 
 import (
-	sq "github.com/lann/squirrel"
+	sq "github.com/Masterminds/squirrel"
 )
 
 type truncator struct {

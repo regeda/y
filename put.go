@@ -1,6 +1,6 @@
 package y
 
-import sq "github.com/lann/squirrel"
+import sq "github.com/Masterminds/squirrel"
 
 // Put inserts new objects
 func Put(db DB, p *Proxy) (int64, error) {

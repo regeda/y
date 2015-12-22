@@ -4,7 +4,7 @@ import (
 	"log"
 	"reflect"
 
-	sq "github.com/lann/squirrel"
+	sq "github.com/Masterminds/squirrel"
 )
 
 // Modifier changes a value for update statement

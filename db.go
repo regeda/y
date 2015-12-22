@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	sq "github.com/lann/squirrel"
+	sq "github.com/Masterminds/squirrel"
 )
 
 // Execer decribes exec operation

@@ -1,6 +1,6 @@
 package y
 
-import sq "github.com/lann/squirrel"
+import sq "github.com/Masterminds/squirrel"
 
 // Finder loads a collection from a database
 type Finder struct {
