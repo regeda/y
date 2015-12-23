@@ -15,16 +15,16 @@ func (f *Finder) Qualify(q Qualifier) *Finder {
 }
 
 // Load fetches an object from db and loads in self proxy
-func (f *Finder) Load(db DB) error {
-	row := queryRow(f.builder, db)
+func (f *Finder) Load(db sq.BaseRunner) error {
+	row := f.builder.RunWith(db).QueryRow()
 	ptrs := f.proxy.schema.ptrs()
 	f.proxy.schema.set(ptrs, f.proxy.v)
 	return row.Scan(ptrs...)
 }
 
 // Fetch make a query and creates a collection
-func (f *Finder) Fetch(db DB) (*Collection, error) {
-	rows, err := query(f.builder, db)
+func (f *Finder) Fetch(db sq.BaseRunner) (*Collection, error) {
+	rows, err := f.builder.RunWith(db).Query()
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +45,6 @@ func makeFinder(p *Proxy, b sq.SelectBuilder) *Finder {
 }
 
 // Fetch loads a collection of objects
-func Fetch(db DB, v interface{}) (*Collection, error) {
+func Fetch(db sq.BaseRunner, v interface{}) (*Collection, error) {
 	return New(v).Fetch(db)
 }

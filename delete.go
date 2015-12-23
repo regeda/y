@@ -13,14 +13,14 @@ func (t truncator) ToSql() (string, []interface{}, error) {
 }
 
 // Truncate erases all data from a table
-func Truncate(db DB, p *Proxy) (err error) {
-	_, err = exec(truncator{p.schema.table}, db)
+func Truncate(db sq.BaseRunner, p *Proxy) (err error) {
+	_, err = sq.ExecWith(db, truncator{p.schema.table})
 	return
 }
 
 // DeleteBy removes a proxy by values
-func DeleteBy(db DB, p *Proxy, by Values) (int64, error) {
-	result, err := exec(builder{p.schema}.forDelete(sq.Eq(by)), db)
+func DeleteBy(db sq.BaseRunner, p *Proxy, by Values) (int64, error) {
+	result, err := builder{p.schema}.forDelete(sq.Eq(by)).RunWith(db).Exec()
 	if err != nil {
 		return 0, err
 	}

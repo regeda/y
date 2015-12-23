@@ -68,7 +68,7 @@ func (c *Changer) modify() sq.Eq {
 }
 
 // Update saves object changes in db after version validation
-func (c *Changer) Update(db DB) (err error) {
+func (c *Changer) Update(db sq.BaseRunner) (err error) {
 	version := c.proxy.version()
 	if !version.Valid {
 		log.Panicf(
@@ -86,8 +86,7 @@ func (c *Changer) Update(db DB) (err error) {
 	version.Int64++
 	clauses[_version] = version.Int64
 	// save
-	result, err := exec(
-		builder{c.proxy.schema}.forUpdate(clauses, sq.Eq(pk)), db)
+	result, err := builder{c.proxy.schema}.forUpdate(clauses, sq.Eq(pk)).RunWith(db).Exec()
 	if err == nil {
 		count, _ := result.RowsAffected()
 		if count != 1 {
@@ -102,6 +101,6 @@ func makeChanger(p *Proxy, v Values) *Changer {
 }
 
 // Update saves object changes
-func Update(db DB, p *Proxy, v Values) error {
+func Update(db sq.BaseRunner, p *Proxy, v Values) error {
 	return makeChanger(p, v).Update(db)
 }

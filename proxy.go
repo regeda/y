@@ -9,12 +9,12 @@ import (
 
 // Proxy contains a schema of a type
 type Proxy struct {
-	v      value
-	schema schema
+	v value
+	schema
 }
 
 // Put creates a new object
-func (p *Proxy) Put(db DB) (int64, error) {
+func (p *Proxy) Put(db sq.BaseRunner) (int64, error) {
 	return Put(db, p)
 }
 
@@ -24,7 +24,7 @@ func (p *Proxy) Query(b sq.SelectBuilder) *Finder {
 }
 
 // Fetch returns a collection of objects
-func (p *Proxy) Fetch(db DB) (*Collection, error) {
+func (p *Proxy) Fetch(db sq.BaseRunner) (*Collection, error) {
 	return p.Find().Fetch(db)
 }
 
@@ -46,7 +46,7 @@ func (p *Proxy) Collection() *Collection {
 }
 
 // Join adds related collection to self
-func (p *Proxy) Join(db DB, in *Collection) (*Collection, error) {
+func (p *Proxy) Join(db sq.BaseRunner, in *Collection) (*Collection, error) {
 	fk := p.schema.fk(in.schema)
 
 	idx := in.lookidx(fk.target)
@@ -62,12 +62,12 @@ func (p *Proxy) Join(db DB, in *Collection) (*Collection, error) {
 }
 
 // Load fetches an object from db by primary key
-func (p *Proxy) Load(db DB) error {
+func (p *Proxy) Load(db sq.BaseRunner) error {
 	return p.loadBy(db, p.primary())
 }
 
 // MustLoad fetches an object and panic if an error occurred
-func (p *Proxy) MustLoad(db DB) *Proxy {
+func (p *Proxy) MustLoad(db sq.BaseRunner) *Proxy {
 	err := p.Load(db)
 	if err != nil {
 		panic(err.Error())
@@ -86,22 +86,22 @@ func (p *Proxy) Map() Values {
 }
 
 // Update saves changes of the object
-func (p *Proxy) Update(db DB, v Values) error {
+func (p *Proxy) Update(db sq.BaseRunner, v Values) error {
 	return Update(db, p, v)
 }
 
 // Truncate erases all data
-func (p *Proxy) Truncate(db DB) error {
+func (p *Proxy) Truncate(db sq.BaseRunner) error {
 	return Truncate(db, p)
 }
 
 // Delete removes a proxy by primary
-func (p *Proxy) Delete(db DB) (int64, error) {
+func (p *Proxy) Delete(db sq.BaseRunner) (int64, error) {
 	return p.DeleteBy(db, p.primary())
 }
 
 // DeleteBy removes a proxy by values
-func (p *Proxy) DeleteBy(db DB, by Values) (int64, error) {
+func (p *Proxy) DeleteBy(db sq.BaseRunner, by Values) (int64, error) {
 	return DeleteBy(db, p, by)
 }
 
@@ -121,7 +121,7 @@ func (p *Proxy) version() *sql.NullInt64 {
 	return p.Field(_version).Addr().Interface().(*sql.NullInt64)
 }
 
-func (p *Proxy) loadBy(db DB, eq Values) error {
+func (p *Proxy) loadBy(db sq.BaseRunner, eq Values) error {
 	return p.findByEq(sq.Eq(eq)).Load(db)
 }
 

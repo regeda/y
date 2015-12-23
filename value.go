@@ -1,6 +1,10 @@
 package y
 
-import "reflect"
+import (
+	"reflect"
+
+	sq "github.com/Masterminds/squirrel"
+)
 
 type wrapper interface {
 	field(string) reflect.Value
@@ -10,7 +14,7 @@ type wrapper interface {
 
 type value interface {
 	wrapper
-	put(DB, schema) (int64, error)
+	put(sq.BaseRunner, schema) (int64, error)
 	index(int) value
 	size() int
 	addTo(*Collection)
