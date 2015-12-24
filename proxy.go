@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"reflect"
 
-	sq "github.com/Masterminds/squirrel"
+	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 // Proxy contains a schema of a type

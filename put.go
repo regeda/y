@@ -1,6 +1,6 @@
 package y
 
-import sq "github.com/Masterminds/squirrel"
+import sq "gopkg.in/Masterminds/squirrel.v1"
 
 // Put inserts new objects
 func Put(db sq.BaseRunner, p *Proxy) (int64, error) {

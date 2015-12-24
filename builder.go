@@ -1,6 +1,6 @@
 package y
 
-import sq "github.com/Masterminds/squirrel"
+import sq "gopkg.in/Masterminds/squirrel.v1"
 
 type builder struct {
 	schema

@@ -7,7 +7,7 @@ Be faster with Y. The simplest ORM-like framework for Golang.
 ## Install
 
 ```bash
-go get github.com/Masterminds/squirrel
+go get gopkg.in/Masterminds/squirrel.v1
 go get github.com/Repo2/y
 ```
 
