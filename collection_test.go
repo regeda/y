@@ -10,11 +10,6 @@ var _ = Describe("Collection", func() {
 		ID int64 `y:"id,pk"`
 	}
 
-	type smthComposite struct {
-		X int64  `y:",pk"`
-		Y string `y:",pk"`
-	}
-
 	Context("when one item added", func() {
 		var (
 			ptr *something
@@ -32,34 +27,6 @@ var _ = Describe("Collection", func() {
 
 		It("should be contain the first item", func() {
 			Expect(c.First()).To(Equal(ptr))
-		})
-
-		It("should return the correct item by a primary key", func() {
-			Expect(c.Get(int64(1))).To(Equal(ptr))
-		})
-
-		It("should return nil value by unknown primary key", func() {
-			Expect(c.Get(int64(2))).To(BeNil())
-		})
-	})
-
-	Context("when one composite item added", func() {
-		var (
-			ptr *smthComposite
-			c   *Collection
-		)
-
-		BeforeEach(func() {
-			ptr = &smthComposite{X: 1, Y: "y"}
-			c = New(ptr).Collection()
-		})
-
-		It("should return the correct item by a primary key", func() {
-			Expect(c.Get(int64(1), "y")).To(Equal(ptr))
-		})
-
-		It("should return nil value by unknown primary key", func() {
-			Expect(c.Get(int64(1), "x")).To(BeNil())
 		})
 	})
 

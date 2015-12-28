@@ -59,32 +59,6 @@ func (c *Collection) cells(cells []int) []reflect.Value {
 	return items
 }
 
-// Get returns an item by primary key
-func (c *Collection) Get(pk ...interface{}) interface{} {
-	fields := c.schema.xinfo.pk
-	flen := len(fields)
-	if flen == 0 {
-		log.Panicf(
-			"y/colleciton: no primary key in the schema definition \"%s\".", c.table)
-	}
-	if flen != len(pk) {
-		log.Panicln("y/collection: missing primary key parameters.")
-	}
-	idx := c.lookidx(fields[0])
-CellLoop:
-	for _, cell := range idx.cells[pk[0].(int64)] {
-		item := valueOf(c.items[cell])
-		// matching by a composite primary key
-		for i := 1; i < flen; i++ {
-			if c.schema.fval(item, fields[i]).Interface() != pk[i] {
-				continue CellLoop
-			}
-		}
-		return item.addr().Interface()
-	}
-	return nil
-}
-
 // Empty returns false if no items exist
 func (c *Collection) Empty() bool {
 	return c.Size() == 0
