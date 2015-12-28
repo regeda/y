@@ -26,9 +26,9 @@ func makeIndex() *index {
 
 // Collection contains items and indexes
 type Collection struct {
-	items  []reflect.Value
-	idx    map[string]*index
-	schema schema
+	items []reflect.Value
+	idx   map[string]*index
+	schema
 }
 
 func (c *Collection) lookidx(name string) *index {
@@ -36,7 +36,7 @@ func (c *Collection) lookidx(name string) *index {
 	if !ok {
 		log.Panicf(
 			"y/collection: The index \"%s\" not found in collection \"%s\".",
-			name, c.schema.table)
+			name, c.table)
 	}
 	return idx
 }
@@ -59,10 +59,30 @@ func (c *Collection) cells(cells []int) []reflect.Value {
 	return items
 }
 
-// Exists returns true if a value existed in the index
-func (c *Collection) Exists(name string, v int64) (ok bool) {
-	_, ok = c.lookidx(name).cells[v]
-	return
+// Get returns an item by primary key
+func (c *Collection) Get(pk ...interface{}) interface{} {
+	fields := c.schema.xinfo.pk
+	flen := len(fields)
+	if flen == 0 {
+		log.Panicf(
+			"y/colleciton: no primary key in the schema definition \"%s\".", c.table)
+	}
+	if flen != len(pk) {
+		log.Panicln("y/collection: missing primary key parameters.")
+	}
+	idx := c.lookidx(fields[0])
+CellLoop:
+	for _, cell := range idx.cells[pk[0].(int64)] {
+		item := valueOf(c.items[cell])
+		// matching by a composite primary key
+		for i := 1; i < flen; i++ {
+			if c.schema.fval(item, fields[i]).Interface() != pk[i] {
+				continue CellLoop
+			}
+		}
+		return item.addr().Interface()
+	}
+	return nil
 }
 
 // Empty returns false if no items exist
