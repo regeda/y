@@ -27,8 +27,8 @@ if err != nil {
 log.Printf("%#v\n", c.List())
 ```
 
-### Find
-**Find** modifies a query for custom selection.
+### FindBy
+**FindBy** modifies a query for custom selection.
 ```go
 type Order struct {
   ID    int64 `y:"id,pk"`

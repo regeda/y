@@ -34,16 +34,16 @@ var ByID = func(id interface{}) Qualifier {
 }
 
 // TxPipe run some db statement
-type TxPipe func(db sq.BaseRunner, v interface{}) error
+type TxPipe func(sq.BaseRunner) error
 
 // Tx executes statements in a transaction
-func Tx(db *sql.DB, v interface{}, pipes ...TxPipe) (err error) {
+func Tx(db *sql.DB, pipes ...TxPipe) (err error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return
 	}
 	for _, pipe := range pipes {
-		err = pipe(tx, v)
+		err = pipe(tx)
 		if err != nil {
 			tx.Rollback()
 			return
