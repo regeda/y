@@ -1,0 +1,7 @@
+package: y
+import:
+- package: github.com/masterminds/squirrel
+  version: v1
+- package: github.com/onsi/ginkgo
+- package: github.com/onsi/gomega
+

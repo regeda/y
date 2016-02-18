@@ -1,0 +1,19 @@
+hash: e51435ca46013a2a19b79acf3103c4e7d7b889d54d0d636fdc670e7f29bcf632
+updated: 2016-02-19T00:10:20.102933642+03:00
+imports:
+- name: github.com/golang/protobuf
+  version: 127091107ff5f822298f1faa7487ffcf578adcf6
+  repo: https://github.com/golang/protobuf
+- name: github.com/lann/builder
+  version: f22ce00fd9394014049dad11c244859432bd6820
+  repo: https://github.com/lann/builder
+- name: github.com/lann/ps
+  version: 62de8c46ede02a7675c4c79c84883eb164cb71e3
+  repo: https://github.com/lann/ps
+- name: github.com/masterminds/squirrel
+  version: 1f8a6e983e7a153765cf26564d87cfb966da67c2
+- name: github.com/onsi/ginkgo
+  version: 07d85e6b10c4289c7d612f9b13f45ba36f66d55b
+- name: github.com/onsi/gomega
+  version: c72df929b80ef4930aaa75d5e486887ff2f3e06a
+devImports: []

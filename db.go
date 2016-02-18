@@ -3,7 +3,7 @@ package y
 import (
 	"database/sql"
 
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/masterminds/squirrel"
 )
 
 // Versionable mixins a version to a model
