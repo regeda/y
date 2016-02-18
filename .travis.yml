@@ -2,7 +2,6 @@ language: go
 
 go:
   - 1.5
-  - tip
 
 install:
   - go get github.com/Masterminds/glide
