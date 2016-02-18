@@ -1,6 +1,6 @@
 # y
 
-[![Build Status](https://travis-ci.org/mkabischev/y.svg?branch=master)](https://travis-ci.org/Repo2/y)
+[![Build Status](https://travis-ci.org/Repo2/y.svg?branch=master)](https://travis-ci.org/Repo2/y)
 
 Be faster with Y. The simplest ORM-like framework for Golang.
 
