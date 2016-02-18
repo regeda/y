@@ -1,14 +1,12 @@
 language: go
 
 go:
-  - 1.3
-  - 1.4
   - 1.5
   - tip
 
 install:
   - go get github.com/Masterminds/glide
-  - cd src/github.com/Masterminds/glide && make bootstrap && make build
+  - cd $GOPATH/src/github.com/Masterminds/glide && make bootstrap && make build
   - glide install
 
-script: go test -v
+script: GO15VENDOREXPERIMENT=1 go test -v
