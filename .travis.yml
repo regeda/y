@@ -6,7 +6,7 @@ go:
 
 install:
   - go get github.com/Masterminds/glide
-  - cd $GOPATH/src/github.com/Masterminds/glide && make bootstrap && make build
-  - cd $TRAVIS_BUILD_DIR && GO15VENDOREXPERIMENT=1 glide install
+  - (cd $GOPATH/src/github.com/Masterminds/glide && make bootstrap && make build)
+  - GO15VENDOREXPERIMENT=1 glide install
 
 script: GO15VENDOREXPERIMENT=1 go test -v
