@@ -3,6 +3,7 @@ package y
 import (
 	"database/sql"
 	"fmt"
+	"net"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -18,7 +19,8 @@ const (
 )
 
 var (
-	dsn string
+	dsn       string
+	available bool
 )
 
 func init() {
@@ -35,6 +37,11 @@ func init() {
 	dbname := env("MYSQL_TEST_DBNAME", "y_test")
 	netAddr := fmt.Sprintf("%s(%s)", prot, addr)
 	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s&strict=true", user, pass, netAddr, dbname)
+	c, err := net.Dial(prot, addr)
+	if err == nil {
+		available = true
+		c.Close()
+	}
 }
 
 var _ = Describe("Proxy", func() {
@@ -45,7 +52,11 @@ var _ = Describe("Proxy", func() {
 		Name string
 	}
 
+	// common setup
 	BeforeEach(func() {
+		if !available {
+			Skip(fmt.Sprintf("MySQL server not running on %s", dsn))
+		}
 		db, _ = sql.Open("mysql", dsn)
 		_, err := db.Exec(`
       CREATE TABLE y_test (
@@ -54,10 +65,11 @@ var _ = Describe("Proxy", func() {
         _version INTEGER
       )`)
 		if err != nil {
-			panic(err.Error())
+			Skip(err.Error())
 		}
 	})
 
+	// common teardown
 	AfterEach(func() {
 		db.Exec("DROP TABLE y_test")
 		db.Close()
@@ -137,7 +149,7 @@ var _ = Describe("Proxy", func() {
 		It("the name is changed", func() {
 			Expect(ytest.Name).To(Equal("bar"))
 		})
-		It("the versions is updated", func() {
+		It("the version is updated", func() {
 			Expect(ytest.Version.Int64).To(Equal(int64(2)))
 		})
 	})
