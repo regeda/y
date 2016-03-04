@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	// models work with mysql only
 	_ "github.com/go-sql-driver/mysql"
 )
 
