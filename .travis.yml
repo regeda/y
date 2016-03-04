@@ -1,14 +1,20 @@
 language: go
 
+sudo: false
+
 go:
   - 1.3
   - 1.4
   - 1.5
+  - 1.6
   - tip
 
 install:
   - go get gopkg.in/Masterminds/squirrel.v1
   - go get github.com/onsi/ginkgo/ginkgo
   - go get github.com/onsi/gomega
+
+before_script:
+  - mysql -e "CREATE DATABASE IF NOT EXISTS y_test;"
 
 script: ginkgo -v
