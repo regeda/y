@@ -22,6 +22,6 @@ env:
 
 before_script:
   - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE y_test;" -uroot; fi
-  - if [[ "$DB" == "postgres" ]]; then psql -c "CREATE DATABASE y_test;"" -U postgres; fi
+  - if [[ "$DB" == "postgres" ]]; then psql -c "CREATE DATABASE y_test;" -U postgres; fi
 
 script: ginkgo -v
