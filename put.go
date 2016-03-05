@@ -12,7 +12,7 @@ func (v plural) put(db sq.BaseRunner, s schema) (int64, error) {
 	if l == 0 {
 		return 0, nil
 	}
-	q := sq.Insert(s.table)
+	q := builder{s}.forInsert()
 	for i := 0; i < l; i++ {
 		ptrs := s.ptrs()
 		s.set(ptrs, v.index(i))
@@ -32,17 +32,6 @@ func (v singular) put(db sq.BaseRunner, s schema) (int64, error) {
 			set[name] = v.field(f.Name).Interface()
 		}
 	}
-	result, err := sq.Insert(s.table).SetMap(set).RunWith(db).Exec()
-	if err != nil {
-		return 0, err
-	}
-	for _, pk := range s.xinfo.pk {
-		f := s.fields[pk]
-		if f.autoincr {
-			id, _ := result.LastInsertId()
-			v.field(f.Name).SetInt(id)
-			break
-		}
-	}
-	return result.RowsAffected()
+	b := builder{s}
+	return b.grabInsertID(v, b.forInsert().SetMap(set).RunWith(db))
 }

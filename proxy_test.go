@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -17,10 +18,76 @@ const (
 	FixturedName       = "foo"
 )
 
+type env func(string, string) string
+
+type testrdb interface {
+	Setup(env) (string, error)
+	CreateTable() string
+}
+
+type mysqlrdb struct{}
+
+func (m mysqlrdb) Setup(e env) (dsn string, err error) {
+	user := e("MYSQL_TEST_USER", "root")
+	pass := e("MYSQL_TEST_PASS", "")
+	prot := e("MYSQL_TEST_PROT", "tcp")
+	addr := e("MYSQL_TEST_ADDR", "localhost:3306")
+	dbname := e("MYSQL_TEST_DBNAME", "y_test")
+	netAddr := fmt.Sprintf("%s(%s)", prot, addr)
+	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s&strict=true", user, pass, netAddr, dbname)
+	c, err := net.Dial(prot, addr)
+	if err == nil {
+		c.Close()
+	}
+	return
+}
+
+func (m mysqlrdb) CreateTable() string {
+	return `
+CREATE TABLE y_test (
+	id INTEGER PRIMARY KEY AUTO_INCREMENT,
+	name TEXT,
+	_version INTEGER
+)`
+}
+
+type postgresrdb struct{}
+
+func (p postgresrdb) Setup(e env) (dsn string, err error) {
+	SetBuilderProvider(Postgres)
+	user := e("PG_TEST_USER", "postgres")
+	pass := e("PG_TEST_PASS", "")
+	addr := e("PG_TEST_ADDR", "localhost:5432")
+	dbname := e("PG_TEST_DBNAME", "y_test")
+	dsn = fmt.Sprintf("postgres://%s:%s@%s/%s?connect_timeout=30", user, pass, addr, dbname)
+	return
+}
+
+func (p postgresrdb) CreateTable() string {
+	return `
+CREATE TABLE y_test (
+	id SERIAL PRIMARY KEY,
+	name TEXT,
+	_version INTEGER
+)`
+}
+
 var (
-	dsn       string
-	available bool
+	rdb     testrdb
+	rdbtype string
+	rdberr  error
+	dsn     string
 )
+
+func rdbfactory(rdbtype string) (testrdb, error) {
+	switch rdbtype {
+	case "mysql":
+		return mysqlrdb{}, nil
+	case "postgres":
+		return postgresrdb{}, nil
+	}
+	return nil, fmt.Errorf("Unknown RDBS: %s", rdbtype)
+}
 
 func init() {
 	env := func(key, defaultValue string) string {
@@ -29,17 +96,10 @@ func init() {
 		}
 		return defaultValue
 	}
-	user := env("MYSQL_TEST_USER", "root")
-	pass := env("MYSQL_TEST_PASS", "")
-	prot := env("MYSQL_TEST_PROT", "tcp")
-	addr := env("MYSQL_TEST_ADDR", "localhost:3306")
-	dbname := env("MYSQL_TEST_DBNAME", "y_test")
-	netAddr := fmt.Sprintf("%s(%s)", prot, addr)
-	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s&strict=true", user, pass, netAddr, dbname)
-	c, err := net.Dial(prot, addr)
-	if err == nil {
-		available = true
-		c.Close()
+	rdbtype = env("DB", "mysql")
+	rdb, rdberr = rdbfactory(rdbtype)
+	if rdberr == nil {
+		dsn, rdberr = rdb.Setup(env)
 	}
 }
 
@@ -53,16 +113,11 @@ var _ = Describe("Proxy", func() {
 
 	// common setup
 	BeforeEach(func() {
-		if !available {
-			Skip(fmt.Sprintf("MySQL server not running on %s", dsn))
+		if rdberr != nil {
+			Skip(fmt.Sprintf("%s server has got an error: %s", rdbtype, rdberr.Error()))
 		}
-		db, _ = sql.Open("mysql", dsn)
-		_, err := db.Exec(`
-      CREATE TABLE y_test (
-        id INTEGER PRIMARY KEY AUTO_INCREMENT,
-        name TEXT,
-        _version INTEGER
-      )`)
+		db, _ = sql.Open(rdbtype, dsn)
+		_, err := db.Exec(rdb.CreateTable())
 		if err != nil {
 			Skip(err.Error())
 		}
@@ -89,7 +144,7 @@ var _ = Describe("Proxy", func() {
 			_, err = New(&ytest).Put(db)
 		})
 
-		It("no error occuried", func() {
+		It("no error occurred", func() {
 			Expect(err).To(BeNil())
 		})
 		It("the primary key is not empty", func() {
@@ -115,7 +170,7 @@ var _ = Describe("Proxy", func() {
 			err = New(&ytest).Load(db)
 		})
 
-		It("no error occuried", func() {
+		It("no error occurred", func() {
 			Expect(err).To(BeNil())
 		})
 		It("the name is not empty", func() {
@@ -142,7 +197,7 @@ var _ = Describe("Proxy", func() {
 			err = New(&ytest).Update(db, Values{"name": "bar"})
 		})
 
-		It("no error occuried", func() {
+		It("no error occurred", func() {
 			Expect(err).To(BeNil())
 		})
 		It("the name is changed", func() {

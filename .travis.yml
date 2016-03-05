@@ -11,11 +11,17 @@ go:
 
 install:
   - go get github.com/go-sql-driver/mysql
+  - go get github.com/lib/pq
   - go get gopkg.in/Masterminds/squirrel.v1
   - go get github.com/onsi/ginkgo/ginkgo
   - go get github.com/onsi/gomega
 
+env:
+  - DB=mysql
+  - DB=postgres
+
 before_script:
-  - mysql -e "CREATE DATABASE IF NOT EXISTS y_test;"
+  - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE y_test;" -uroot; fi
+  - if [[ "$DB" == "postgres" ]]; then psql -c "CREATE DATABASE y_test;"" -U postgres; fi
 
 script: ginkgo -v
