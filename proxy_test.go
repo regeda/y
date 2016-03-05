@@ -59,7 +59,7 @@ func (p postgresrdb) Setup(e env) (dsn string, err error) {
 	pass := e("PG_TEST_PASS", "")
 	addr := e("PG_TEST_ADDR", "localhost:5432")
 	dbname := e("PG_TEST_DBNAME", "y_test")
-	dsn = fmt.Sprintf("postgres://%s:%s@%s/%s?connect_timeout=30", user, pass, addr, dbname)
+	dsn = fmt.Sprintf("postgres://%s:%s@%s/%s?connect_timeout=30&sslmode=disable", user, pass, addr, dbname)
 	return
 }
 
