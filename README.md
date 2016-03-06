@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/Repo2/y.svg?branch=master)](https://travis-ci.org/Repo2/y)
 
 Be faster with Y. The simplest ORM-like framework for Golang.
+The purpose of the library is a pure data modeling from a scratch.
 
 ## Install
 
@@ -11,7 +12,25 @@ go get gopkg.in/Masterminds/squirrel.v1
 go get github.com/Repo2/y
 ```
 
+## RDBS
+You can use both databases: MySQL (default) and Postgres.
+If you wanted to use Postgres you should call ```SetBuilderProvider``` method once before any Y routine:
+```go
+y.SetBuilderProvider(y.Postgres)
+```
+Y has been tested with following drivers:
+- ```github.com/go-sql-driver/mysql```
+- ```github.com/lib/pq```
+
 ## Actions
+
+* [Fetch](#fetch)
+* [FindBy](#findby)
+* [Load](#load)
+* [Put](#put)
+* [Update](#update)
+* [Delete](#delete)
+* [Join](#join)
 
 ### Fetch
 **Fetch** executes ```SELECT``` statement and returns a collection of objects.
@@ -145,5 +164,10 @@ if !users.Empty() {
 }
 ```
 
-## TODO
-- [ ] More tests!
+## Pull requests
+Please, be free to make pull requests or issues posting.
+
+## License
+MIT
+
+Original source: https://github.com/Repo2/y
