@@ -1,6 +1,7 @@
 # y
 
 [![Build Status](https://travis-ci.org/Repo2/y.svg?branch=master)](https://travis-ci.org/Repo2/y)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Repo2/y)](https://goreportcard.com/report/github.com/Repo2/y)
 
 Be faster with Y. The simplest ORM-like framework for Golang.
 The purpose of the library is a pure data modeling from a scratch.
