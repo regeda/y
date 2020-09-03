@@ -3,7 +3,7 @@ package y
 import (
 	"reflect"
 
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 type wrapper interface {

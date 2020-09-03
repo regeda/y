@@ -3,18 +3,19 @@ language: go
 sudo: false
 
 go:
-  - 1.3
-  - 1.4
-  - 1.5
-  - 1.6
   - tip
+  - stable
+
+matrix:
+  allow_failures:
+    - go: tip
+
+services:
+  - mysql
+  - postgresql
 
 install:
-  - go get github.com/go-sql-driver/mysql
-  - go get github.com/lib/pq
-  - go get gopkg.in/Masterminds/squirrel.v1
   - go get github.com/onsi/ginkgo/ginkgo
-  - go get github.com/onsi/gomega
 
 env:
   - DB=mysql

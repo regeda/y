@@ -34,10 +34,10 @@ func (m mysqlrdb) Setup(e env) (dsn string, err error) {
 	addr := e("MYSQL_TEST_ADDR", "localhost:3306")
 	dbname := e("MYSQL_TEST_DBNAME", "y_test")
 	netAddr := fmt.Sprintf("%s(%s)", prot, addr)
-	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s&strict=true", user, pass, netAddr, dbname)
+	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s", user, pass, netAddr, dbname)
 	c, err := net.Dial(prot, addr)
 	if err == nil {
-		c.Close()
+		_, err = c.Close()
 	}
 	return
 }
