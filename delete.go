@@ -1,7 +1,7 @@
 package y
 
 import (
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 type truncator struct {

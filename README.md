@@ -1,7 +1,7 @@
 # y
 
-[![Build Status](https://travis-ci.org/Repo2/y.svg?branch=master)](https://travis-ci.org/Repo2/y)
-[![Go Report Card](https://goreportcard.com/badge/github.com/Repo2/y)](https://goreportcard.com/report/github.com/Repo2/y)
+[![Build Status](https://travis-ci.org/regeda/y.svg?branch=master)](https://travis-ci.org/regeda/y)
+[![Go Report Card](https://goreportcard.com/badge/github.com/regeda/y)](https://goreportcard.com/report/github.com/regeda/y)
 
 Be faster with Y. The simplest ORM-like framework for Golang.
 The purpose of the library is a pure data modeling from a scratch.
@@ -9,8 +9,7 @@ The purpose of the library is a pure data modeling from a scratch.
 ## Install
 
 ```bash
-go get gopkg.in/Masterminds/squirrel.v1
-go get github.com/Repo2/y
+go get github.com/regeda/y
 ```
 
 ## RDBS
@@ -125,7 +124,7 @@ if err != nil {
   log.Panicln(err)
 }
 log.Printf("%#v\n", car)
-```  
+```
 
 ### Delete
 **Delete** executes ```DELETE``` statement. The action removes an object by primary keys.
@@ -171,4 +170,4 @@ Please, be free to make pull requests or issues posting.
 ## License
 MIT
 
-Original source: https://github.com/Repo2/y
+Original source: https://github.com/regeda/y

@@ -4,7 +4,7 @@ import (
 	"log"
 	"reflect"
 
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 // Modifier changes a value for update statement
