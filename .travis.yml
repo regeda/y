@@ -1,12 +1,10 @@
 language: go
 
-sudo: false
-
 go:
   - tip
   - stable
 
-matrix:
+jobs:
   allow_failures:
     - go: tip
 
