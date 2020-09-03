@@ -37,7 +37,7 @@ func (m mysqlrdb) Setup(e env) (dsn string, err error) {
 	dsn = fmt.Sprintf("%s:%s@%s/%s?timeout=30s", user, pass, netAddr, dbname)
 	c, err := net.Dial(prot, addr)
 	if err == nil {
-		_, err = c.Close()
+		c.Close()
 	}
 	return
 }
