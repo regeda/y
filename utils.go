@@ -1,26 +1,65 @@
 package y
 
 import (
-	"regexp"
-	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 // Values is the map of something
 type Values map[string]interface{}
 
-var (
-	snake = regexp.MustCompile("(^[^A-Z]*|[A-Z]*)([A-Z][^A-Z]+|$)")
-)
+type buffer struct {
+	r         []byte
+	runeBytes [utf8.UTFMax]byte
+}
 
+func (b *buffer) write(r rune) {
+	if r < utf8.RuneSelf {
+		b.r = append(b.r, byte(r))
+		return
+	}
+	n := utf8.EncodeRune(b.runeBytes[0:], r)
+	b.r = append(b.r, b.runeBytes[0:n]...)
+}
+
+func (b *buffer) indent() {
+	if len(b.r) > 0 {
+		b.r = append(b.r, '_')
+	}
+}
+
+// underscore is given from https://gist.github.com/regeda/969a067ff4ed6ffa8ed6
 func underscore(s string) string {
-	var a []string
-	for _, sub := range snake.FindAllStringSubmatch(s, -1) {
-		if sub[1] != "" {
-			a = append(a, sub[1])
-		}
-		if sub[2] != "" {
-			a = append(a, sub[2])
+	b := buffer{
+		r: make([]byte, 0, len(s)),
+	}
+	var m rune
+	var w bool
+	for _, ch := range s {
+		if unicode.IsUpper(ch) {
+			if m != 0 {
+				if !w {
+					b.indent()
+					w = true
+				}
+				b.write(m)
+			}
+			m = unicode.ToLower(ch)
+		} else {
+			if m != 0 {
+				b.indent()
+				b.write(m)
+				m = 0
+				w = false
+			}
+			b.write(ch)
 		}
 	}
-	return strings.ToLower(strings.Join(a, "_"))
+	if m != 0 {
+		if !w {
+			b.indent()
+		}
+		b.write(m)
+	}
+	return string(b.r)
 }
